@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.9.34607.119
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WikipediaQuizGenerator", "WikipediaQuizGenerator\WikipediaQuizGenerator.csproj", "{8D4EFB36-EC10-407D-AE4D-8D024B0C83B8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WikipediaQuizGenerator", "WikipediaQuizGenerator\WikipediaQuizGenerator.csproj", "{8D4EFB36-EC10-407D-AE4D-8D024B0C83B8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WikipediaQuizGenerator.Client", "WikipediaQuizGenerator.Client\WikipediaQuizGenerator.Client.csproj", "{CF67AA12-58D2-4BEF-AD46-FB31A7278904}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WikipediaQuizGenerator.Client", "WikipediaQuizGenerator.Client\WikipediaQuizGenerator.Client.csproj", "{CF67AA12-58D2-4BEF-AD46-FB31A7278904}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
