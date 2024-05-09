@@ -7,18 +7,16 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Components\Pages\Entry.razor.css" />
-    <None Remove="Components\Pages\Home.razor.css" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Content Include="Components\Pages\Entry.razor.css" />
-    <Content Include="Components\Pages\Home.razor.css" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\WikipediaQuizGenerator.Client\WikipediaQuizGenerator.Client.csproj" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="8.0.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="wwwroot\images\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="wwwroot\images\oldWorldMap.jpg" />
   </ItemGroup>
 
 </Project>

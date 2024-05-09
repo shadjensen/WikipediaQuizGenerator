@@ -1,0 +1,26 @@
+﻿body{
+    margin:0;
+    padding:0;
+    height:100%
+}
+
+.world-map-container {
+    position:relative;
+    width: 100%;
+    height: 100%;
+    padding:0;
+    margin:0 auto;
+    overflow:hidden;
+}
+
+.world-map-image {
+    width: 100%;
+    height: 100%;
+    object-fit:contain;
+}
+
+.px-4 {
+    all:initial;
+    padding-right: 0rem;
+    padding-left: 0rem;
+}

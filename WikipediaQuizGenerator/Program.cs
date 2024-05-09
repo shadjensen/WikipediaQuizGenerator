@@ -29,7 +29,7 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseAntiforgery();
 
-app.MapHub<PlayerHub>("/chathub");
+app.MapHub<PlayerHub>("/playerhub");
 
 app.MapRazorComponents<App>()
     .AddInteractiveWebAssemblyRenderMode()

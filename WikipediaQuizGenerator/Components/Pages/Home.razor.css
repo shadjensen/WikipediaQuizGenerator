@@ -1,3 +1,21 @@
-﻿.nav-buttons-container {
+﻿body {
+}
 
+h3 {
+    display:flex;
+    justify-content:center;
+    color: red
+}
+
+.nav-buttons-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items:center;
+}
+
+button {
+    margin: 20px;
+    width: 150px;
+    text-align:center;
 }
