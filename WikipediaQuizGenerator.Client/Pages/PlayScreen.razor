@@ -1,16 +1,35 @@
-﻿@page "/join"
+﻿@page "/playscreen"
 @using Microsoft.AspNetCore.SignalR.Client
 @inject NavigationManager NavigationManager
 
 
-<h3>JoinScreen</h3>
+<h3>PlayScreen</h3>
 
 @if (IsConnected)
 {
-    <input type="text" @bind="userName" />
-    <input type="text" @bind="userCountry" />
-    <button @onclick="JoinLobby">Join</button>
+    @if (currentScreen.Equals("joinScreen"))
+    {
+        <input type="text" @bind="userName" />
+        <input type="text" @bind="userCountry" />
+        <button @onclick="JoinLobby">Join</button>
+        <h3>@added</h3>
 
+    }
+    else if (currentScreen.Equals("gameScreen"))
+    {
+
+
+    }
+    else if(currentScreen.Equals("scoreScreen"))
+    {
+
+
+    }
+    else
+    {
+        <h3> There has been an error of some kind </h3>   
+    
+    }
 }
 
 else
@@ -23,8 +42,10 @@ else
 @code {
     private HubConnection hubConnection;
     private List<string> messages = new List<string>();
-    private string userName;
-    private string userCountry;
+    private string? userName;
+    private string? userCountry;
+    private string? currentScreen = "joinScreen";
+    private bool added = false;
 
     protected override async Task OnInitializedAsync()
     {
@@ -32,10 +53,9 @@ else
         .WithUrl(NavigationManager.ToAbsoluteUri("/playerhub"))
         .Build();
 
-        hubConnection.On<string, string>("JoinLobby", (user, message) =>
+        hubConnection.On<string, string>("LobbyJoined", (user, message) =>
         {
-            var encodedMessage = $"{user}: {message}";
-            messages.Add(encodedMessage);
+            added = true;
             InvokeAsync(StateHasChanged);
 
         });

@@ -9,6 +9,7 @@ builder.Services.AddRazorComponents()
     .AddInteractiveWebAssemblyComponents();
 
 builder.Services.AddSignalR();
+builder.Services.AddSingleton<PlayerDataService>();
 
 var app = builder.Build();
 
@@ -30,6 +31,7 @@ app.UseStaticFiles();
 app.UseAntiforgery();
 
 app.MapHub<PlayerHub>("/playerhub");
+
 
 app.MapRazorComponents<App>()
     .AddInteractiveWebAssemblyRenderMode()
