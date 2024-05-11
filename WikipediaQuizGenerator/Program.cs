@@ -1,6 +1,7 @@
 using WikipediaQuizGenerator.Client.Pages;
 using WikipediaQuizGenerator.Components;
 using WikipediaQuizGenerator.Hubs;
+using WikipediaQuizGenerator.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -8,6 +9,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveWebAssemblyComponents();
 
+builder.Services.AddSingleton<PlayerDataServices>();
 builder.Services.AddSignalR();
 builder.Services.AddSingleton<PlayerDataService>();
 
