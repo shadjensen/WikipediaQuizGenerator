@@ -1,6 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Net;
 using System.Reflection;
@@ -13,8 +14,13 @@ namespace WikipediaUnitTester
         [TestMethod]
         public void TestGetHtml ()
         {
+            Debug.WriteLine("Ted Is SO Cool");
+            Console.WriteLine("This is not a drill");
+
             WebClient client = new WebClient ();
             string page = client.DownloadString("https://en.wikipedia.org/wiki/Japan");
+
+            
 
         }
 
