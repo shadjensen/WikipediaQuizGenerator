@@ -11,7 +11,10 @@
         public Dictionary<string, string> PlayerCountries { get; set; } = new Dictionary<string, string>();
         public Dictionary<string, int> PlayerScores { get; set; } = new Dictionary<string, int>();
 
-        public PlayerDataServices() { }
+        public PlayerDataServices() 
+        {
+            
+        }
 
 
     }
