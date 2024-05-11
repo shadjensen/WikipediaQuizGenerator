@@ -11,8 +11,8 @@
     if (currentScreen.Equals("joinScreen"))
     {
 
-    <input type="text" @bind="userInput" />
-    <input type="text" @bind="messageInput" />
+    <input type="text" @bind="username" />
+    <input type="text" @bind="userCountry" />
     <button @onclick="JoinLobby">Send</button>
     <h3>@joinedLobby</h3>
 
@@ -46,23 +46,27 @@ else
 }
 
 @code {
+    private string currentScreen = "joinScreen";
     private HubConnection hubConnection;
     private List<string> messages = new List<string>();
-    private string userInput;
-    private string messageInput;
+    private string username;
+    private string userCountry;
+    private bool joinedLobby = false;
 
     protected override async Task OnInitializedAsync()
     {
         hubConnection = new HubConnectionBuilder()
-        .WithUrl(NavigationManager.ToAbsoluteUri("/chathub"))
+        .WithUrl(NavigationManager.ToAbsoluteUri("/playerhub"))
         .Build();
 
+        /**
         hubConnection.On<string, string>("LobbyJoined", (user, message) =>
         {
             var encodedMessage = $"{user}: {message}";
             messages.Add(encodedMessage);
             InvokeAsync(StateHasChanged);
         });
+        **/
 
 
         hubConnection.On<string>("LobbyJoined", username =>
@@ -86,7 +90,7 @@ else
     {
 
 
-        hubConnection.SendAsync("JoinLobby", userInput, messageInput);
+        hubConnection.SendAsync("JoinLobby", username, userCountry);
 
     }
 }

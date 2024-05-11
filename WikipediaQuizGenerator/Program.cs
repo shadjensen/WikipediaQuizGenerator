@@ -9,9 +9,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveWebAssemblyComponents();
 
-builder.Services.AddSingleton<PlayerDataServices>();
 builder.Services.AddSignalR();
-builder.Services.AddSingleton<PlayerDataService>();
+builder.Services.AddSingleton<PlayerDataServices>();
 
 var app = builder.Build();
 
