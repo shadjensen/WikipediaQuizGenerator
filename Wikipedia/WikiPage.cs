@@ -1,5 +1,6 @@
 ﻿using System.Net;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace Wikipedia
 {
@@ -23,18 +24,22 @@ namespace Wikipedia
 
         public void parseHtml(string html) 
         {
+            pageTitle = "Japan";
+
             string[] wikiParagraphs = html.Split("\n");
             int index = 0;
             //this indicates the first index of actual text on the page, rather than the formatting and headers that often begin Wiki pages
             int startIndex = 0;
             foreach (string paragraph in wikiParagraphs) 
             {
+                if (startIndex != 0)
+                    break;
+
                 if (paragraph.Substring(0, 50).Contains($"<b>{pageTitle.Replace("_", " ")}"))
                     startIndex = index;
                 index++;
 
-                if (startIndex != 0)
-                    break;
+                
             }
 
             
@@ -69,14 +74,16 @@ namespace Wikipedia
                     //creates a list of link words in each sentence
                     int linkIndex = 0;
                     List<string> keywords = new();
-                    while (linkIndex < sentence.Length) 
+                while (linkIndex < sentence.Length) 
                     {
-                        linkIndex = sentence.IndexOf("title=\"");
+                        
+                        linkIndex = sentence.IndexOf("title=\"") + 7;
                         if (linkIndex >= 0)
                         {
-                            int closeIndex = sentence.Substring(linkIndex, sentence.Length - 1).IndexOf("\"");
-                            keywords.Add(sentence.Substring(linkIndex + 7, closeIndex));
-                            linkIndex = closeIndex;
+                            int sentenceLength = sentence.Length-1;
+                            int wordLength = sentence.Substring(linkIndex, sentence.Length-1-linkIndex).IndexOf("\"");
+                            keywords.Add(sentence.Substring(linkIndex, wordLength));
+                            
                         }
                         else 
                         {

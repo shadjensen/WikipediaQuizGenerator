@@ -5,6 +5,8 @@ using System.Diagnostics;
 using System.IO;
 using System.Net;
 using System.Reflection;
+using Wikipedia;
+
 
 namespace WikipediaUnitTester
 {
@@ -46,6 +48,14 @@ namespace WikipediaUnitTester
 
 
 
+        }
+
+        [TestMethod]
+        public void TestParseBasicHtml() 
+        {
+            WikiPage page = new WikiPage();
+        
+            
         }
     }
 }
