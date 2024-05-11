@@ -7,9 +7,13 @@
 
 @if (IsConnected)
 {
+    if (currentScreen.Equals("joinScreen"))
+    {
+
     <input type="text" @bind="userInput" />
     <input type="text" @bind="messageInput" />
-    <button @onclick="Send">Send</button>
+    <button @onclick="JoinLobby">Send</button>
+    <h3>@joinedLobby</h3>
 
     <ul id="messagesList">
         @foreach (string message in messages)
@@ -18,8 +22,20 @@
         }
 
 
-    </ul>
+        </ul>
+    }
+    else if (currentScreen.Equals("a"))
+    {
 
+
+
+    }
+    else if (currentScreen.Equals(""))
+    {
+        
+    
+    
+    }
 
 }
 else
@@ -33,6 +49,8 @@ else
     private List<string> messages = new List<string>();
     private string userInput;
     private string messageInput;
+    private string currentScreen = "joinScreen";
+    private bool joinedLobby = false;
 
     protected override async Task OnInitializedAsync()
     {
@@ -47,10 +65,29 @@ else
             InvokeAsync(StateHasChanged);
         });
 
+
+        hubConnection.On<string>("LobbyJoined", username =>
+        {
+            if (username.Equals("Could not resolve playerDataServices"))
+                currentScreen = "Error";
+
+            joinedLobby = true;
+            messages.Add(username);
+            InvokeAsync(StateHasChanged);
+        });
+
         await hubConnection.StartAsync();
     }
 
     Task Send() => hubConnection.SendAsync("SendMessage", userInput, messageInput);
 
     public bool IsConnected => hubConnection.State == HubConnectionState.Connected;
+
+    public void JoinLobby()
+    {
+
+
+        hubConnection.SendAsync("JoinLobby", userInput, messageInput);
+
+    }
 }
