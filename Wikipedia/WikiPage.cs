@@ -11,6 +11,10 @@ namespace Wikipedia
         public List<string> allKeywords;
         public string html;
         string pageTitle;
+        /// <summary>
+        /// Creates a new Wiki page object from a string url. This url should be in the format https://en.wikipedia.org/wiki/ + the title of the page.
+        /// </summary>
+        /// <param name="url"></param>
         public WikiPage(string url) 
         {
             sentencePairs = new();
@@ -19,7 +23,8 @@ namespace Wikipedia
             WebClient client = new WebClient();
 
             html = client.DownloadString(url);
-            
+            pageTitle = url.Substring(30);
+
             parseHtml(html);
 
 
@@ -28,23 +33,10 @@ namespace Wikipedia
 
         public void parseHtml(string html) 
         {
-            pageTitle = "Japan";
+            html = Regex.Replace(html, @"(?<=\d)\.(?=\d)|(?<=[A-Z])\.", "_");
 
             string[] wikiParagraphs = html.Split("\n");
-            int index = 0;
-            //this indicates the first index of actual text on the page, rather than the formatting and headers that often begin Wiki pages
-            int startIndex = 0;
-            foreach (string paragraph in wikiParagraphs) 
-            {
-                if (startIndex != 0)
-                    break;
 
-                if (paragraph.Contains($"<b>{pageTitle.Replace("_", " ")}"))
-                    startIndex = index;
-                index++;
-
-                
-            }
 
             
             for (int i = 0; i < wikiParagraphs.Length; i++) 
@@ -56,13 +48,11 @@ namespace Wikipedia
                 if (!paragraph.StartsWith("<p>"))
                     continue;
 
-                //checks if this is the last parsable paragraph on the page
-                if (paragraph.Contains("id=\"See_also\""))
-                    break;
                 
                 string[] paragraphSentences = paragraph.Split(".");
                 foreach (string sentence in paragraphSentences) 
                 {
+                    
                     if (!includeSentence)
                     {
                         includeSentence = true;
@@ -87,7 +77,12 @@ namespace Wikipedia
                             inTag = false;
                     }
 
-                    string formattedSentence = Regex.Replace(formattedSentenceBuilder.ToString(), @"&(\w+)\s", "");
+
+                    //removes html tags that start with &# and end with ; and a space or just ;
+                    Regex regex = new Regex(@"&#.*?;\s");
+                    string formattedSentence = regex.Replace(formattedSentenceBuilder.ToString(), " ");
+                    formattedSentence = Regex.Replace(formattedSentence, @"&#.*?;", "") + ".";
+
 
                     //creates a list of link words in each sentence
                     int linkIndex = 0;
@@ -121,28 +116,16 @@ namespace Wikipedia
                         includeSentence = false;
                     }
 
-                    /**
-                    string[] sentenceAsWords = formattedSentence.ToString().Split(" ");
-                    List<int> keywordsAsIndexes = new();
-                    
-                    foreach (string keyword in keywords) 
-                    {
-                        int wordIndex = 0;
-                        foreach (string word in sentenceAsWords) 
-                        {
-                            if (word.Equals(keyword, StringComparison.OrdinalIgnoreCase))
-                                keywordsAsIndexes.Add(wordIndex);
-                            wordIndex++;
-                        }
-
-                        
-                    }
-                    **/
-                    
 
 
+
+                    //only add sentences to our list if they are nonempty and they haven't caused errors
                     if (includeSentence && formattedSentenceBuilder.ToString().Length > 0)
+                    {
                         sentencePairs.Add(new Tuple<string, List<string>>(formattedSentence, keywords));
+                        foreach(string keyword in keywords)
+                            allKeywords.Add(keyword);
+                    }
                                       
 
                 }

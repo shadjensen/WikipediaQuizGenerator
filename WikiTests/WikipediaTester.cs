@@ -21,25 +21,20 @@ namespace WikiTests
         }
 
         [TestMethod]
-        public void TestGetHtmlFromFile()
+        public void TestReadFile()
         {
             //retrieves filepath of WikipediaUrls.txt
+   
             string binPath = Path.GetDirectoryName(AppDomain.CurrentDomain.BaseDirectory);
-            string filepath = binPath.Substring(0, binPath.Length - 23) + "WikipediaUrls.txt";
-            filepath = filepath.Replace("\\", "\\\\");
+            string filepath = binPath.Substring(0, binPath.Length - 26) + "WikipediaUrls.txt";
+            filepath = @"C:\Users\jense\source\repos\PersonalProjects\WikipediaQuizGenerator\WikipediaUrls.txt";
 
-            string[] lines = File.ReadAllLines(filepath);
+            string[] urls = File.ReadAllLines(filepath);
 
-            Console.WriteLine(lines);
 
             WebClient client = new WebClient();
-            foreach (string line in lines)
-            {
-                string printLine = client.DownloadString(line);
-                Console.WriteLine(printLine);
-
-            }
-
+            Assert.IsTrue(urls.Contains("https://en.wikipedia.org/wiki/Japan"));
+            Assert.IsTrue(urls.Contains("https://en.wikipedia.org/wiki/Germany"));
 
 
         }

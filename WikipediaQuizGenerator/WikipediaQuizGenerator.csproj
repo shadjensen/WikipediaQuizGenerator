@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\WikipediaQuizGenerator.Client\WikipediaQuizGenerator.Client.csproj" />
+    <ProjectReference Include="..\Wikipedia\Wikipedia.csproj" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="8.0.2" />
   </ItemGroup>
 

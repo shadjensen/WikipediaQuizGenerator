@@ -1,0 +1,82 @@
+﻿@page "/host"
+@using Microsoft.AspNetCore.SignalR.Client
+@inject NavigationManager NavigationManager
+
+@rendermode InteractiveWebAssembly
+
+<h3>Chat</h3>
+
+@if (IsConnected)
+{
+    if (currentScreen.Equals("hostScreen"))
+    {
+        <button @onclick="StartGame">Start Game</button>
+
+        foreach(string player in players)
+        {
+            <ul>@player</ul>
+        }
+    }
+    else if (currentScreen.Equals("a"))
+    {
+
+
+
+    }
+    else if (currentScreen.Equals(""))
+    {
+
+
+
+    }
+
+}
+else
+{
+    <span>Connecting. . . </span>
+
+}
+
+@code {
+    private string currentScreen = "hostScreen";
+    private HubConnection hubConnection;
+    private List<string> messages = new List<string>();
+    private string username;
+    private string userCountry;
+    private bool joinedLobby = false;
+    private List<string> players;
+
+    protected override async Task OnInitializedAsync()
+    {
+
+        hubConnection = new HubConnectionBuilder()
+        .WithUrl(NavigationManager.ToAbsoluteUri("/playerhub"))
+        .Build();
+
+
+
+        hubConnection.On<string>("LobbyJoined", username =>
+        {
+            if (username.Equals("Could not resolve playerDataServices"))
+                currentScreen = "Error";
+
+            players.Add(username);
+            InvokeAsync(StateHasChanged);
+        });
+
+        await hubConnection.StartAsync();
+        await hubConnection.SendAsync("DeclareHost");
+    }
+
+
+    public bool IsConnected => hubConnection.State == HubConnectionState.Connected;
+
+
+
+    private void StartGame()
+    {
+        
+    
+    
+    }
+}

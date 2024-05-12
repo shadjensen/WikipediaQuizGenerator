@@ -25,15 +25,29 @@
 
         </ul>
     }
-    else if (currentScreen.Equals("a"))
+    else if (currentScreen.Equals("waitScreen"))
+    {
+        <p>waiting for game to begin</p>
+
+
+    }
+    else if (currentScreen.Equals("playScreen"))
+    {
+        foreach(string keyword in keywords)
+        {
+            <button @onclick="selectKeyword">@keyword</button>
+        }
+
+    }
+    else if (currentScreen.Equals("scoreScreen"))
     {
 
 
 
     }
-    else if (currentScreen.Equals(""))
+    else
     {
-        
+        //this is only reached if an error has occured    
     
     
     }
@@ -53,8 +67,12 @@ else
     private string userCountry;
     private bool joinedLobby = false;
 
+    private string[]? keywords;
+
+
     protected override async Task OnInitializedAsync()
     {
+        keywords = new string[8];
         hubConnection = new HubConnectionBuilder()
         .WithUrl(NavigationManager.ToAbsoluteUri("/playerhub"))
         .Build();
@@ -66,9 +84,21 @@ else
             if (username.Equals("Could not resolve playerDataServices"))
                 currentScreen = "Error";
 
-            joinedLobby = true;
+            currentScreen = "waitScreen";
             messages.Add(username);
             InvokeAsync(StateHasChanged);
+        });
+
+        hubConnection.On<string[]>("RecieveAnswerOptions", answers =>
+        {
+            for (int i = 0; i < 8; i++)
+            {
+                keywords[i] = answers[i];             
+            }
+
+            currentScreen = "playScreen";
+            InvokeAsync(StateHasChanged);
+
         });
 
         await hubConnection.StartAsync();
@@ -78,11 +108,14 @@ else
 
     public bool IsConnected => hubConnection.State == HubConnectionState.Connected;
 
-    public void JoinLobby()
+    private void JoinLobby()
     {
-
-
         hubConnection.SendAsync("JoinLobby", username, userCountry);
+    }
 
+    private void selectKeyword()
+    {
+        
+    
     }
 }
