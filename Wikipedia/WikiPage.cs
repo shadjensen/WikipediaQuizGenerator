@@ -10,7 +10,7 @@ namespace Wikipedia
         public List<Tuple<string, List<string>>> sentencePairs;
         public List<string> allKeywords;
         public string html;
-        string pageTitle;
+        public string pageTitle;
         /// <summary>
         /// Creates a new Wiki page object from a string url. This url should be in the format https://en.wikipedia.org/wiki/ + the title of the page.
         /// </summary>
@@ -23,7 +23,7 @@ namespace Wikipedia
             WebClient client = new WebClient();
 
             html = client.DownloadString(url);
-            pageTitle = url.Substring(30);
+            this.pageTitle = url.Substring(30);
 
             parseHtml(html);
 

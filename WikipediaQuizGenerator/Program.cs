@@ -34,6 +34,7 @@ app.UseAntiforgery();
 app.MapHub<PlayerHub>("/playerhub");
 
 
+
 app.MapRazorComponents<App>()
     .AddInteractiveWebAssemblyRenderMode()
     .AddAdditionalAssemblies(typeof(WikipediaQuizGenerator.Client._Imports).Assembly);

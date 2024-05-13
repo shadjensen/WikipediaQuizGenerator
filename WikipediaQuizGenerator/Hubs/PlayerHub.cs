@@ -1,6 +1,7 @@
 ﻿
 using Microsoft.AspNetCore.SignalR;
 using WikipediaQuizGenerator.Services;
+using Wikipedia;
 
 namespace WikipediaQuizGenerator.Hubs
 {
@@ -16,7 +17,9 @@ namespace WikipediaQuizGenerator.Hubs
 
         public void DeclareHost() 
         {
-            host = Clients.Caller;
+            PlayerDataServices? playerDataServices = serviceProvider.GetService<PlayerDataServices>();
+            if (playerDataServices != null)
+                playerDataServices.ServerHost = Clients.Caller;
         }
 
         public async Task SendMessage(string user, string message) 
@@ -37,18 +40,25 @@ namespace WikipediaQuizGenerator.Hubs
                 playerDataServices.PlayerScores.Add(username, 0);
 
                 await Clients.Caller.SendAsync("LobbyJoined", username);
-                await host.SendAsync("LobbyJoined", username);
+                await playerDataServices.ServerHost.SendAsync("LobbyJoined", username);
             }
             else
                 await Clients.Caller.SendAsync("LobbyJoined", "Could not resolve playerDataServices");
         }
 
-        public async Task SendNextQuestion(string[] keywords) 
+        public async Task SendQuestion(string pageTitle) 
         {
+            PlayerDataServices? playerDataServices = serviceProvider.GetService<PlayerDataServices>();
+            if (playerDataServices != null)
+            {
+                playerDataServices.generateQuestion(pageTitle, out string formattedQuestion, out string formattedAnswer, out string[] questionOptions, out string answer);
 
-            await Clients.All.SendAsync("RecieveAnswerOptions", keywords);
+                await Clients.All.SendAsync("RecieveQuestion", questionOptions);
+                await playerDataServices.ServerHost.SendAsync("RecieveQuestion", formattedQuestion, formattedAnswer, answer);
+            }
         
         }
+
 
         
 

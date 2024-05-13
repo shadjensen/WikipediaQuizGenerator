@@ -4,7 +4,7 @@
 
 @rendermode InteractiveWebAssembly
 
-<h3>Chat</h3>
+<h3>Host</h3>
 
 @if (IsConnected)
 {
@@ -17,17 +17,36 @@
             <ul>@player</ul>
         }
     }
-    else if (currentScreen.Equals("a"))
+    else if (currentScreen.Equals("questionScreen"))
     {
 
 
 
     }
-    else if (currentScreen.Equals(""))
+    else if (currentScreen.Equals("answerScreen"))
     {
 
 
 
+    }
+    else if (currentScreen.Equals("scoreScreen"))
+    {
+
+
+    }
+    else if (currentScreen.Equals("finalScoreScreen"))
+    {
+
+
+
+
+
+
+    }
+    else
+    {
+        //this is only reached if there is an error    
+    
     }
 
 }
@@ -48,7 +67,7 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-
+        players = new();
         hubConnection = new HubConnectionBuilder()
         .WithUrl(NavigationManager.ToAbsoluteUri("/playerhub"))
         .Build();
@@ -63,6 +82,14 @@ else
             players.Add(username);
             InvokeAsync(StateHasChanged);
         });
+        hubConnection.On<string, string>("RecieveQuestionHost", (formattedSentence, pagename) =>
+        {
+
+
+
+        });
+
+        
 
         await hubConnection.StartAsync();
         await hubConnection.SendAsync("DeclareHost");
@@ -75,8 +102,13 @@ else
 
     private void StartGame()
     {
+
+
+
+    }
+
+    private async void GetQuestion(string formattedSentence, string pagename)
+    {
         
-    
-    
     }
 }
