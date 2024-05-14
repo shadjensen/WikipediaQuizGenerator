@@ -19,19 +19,24 @@
     }
     else if (currentScreen.Equals("questionScreen"))
     {
+        <p>@formattedQuestion</p>
 
-
-
+        <button @onclick="ShowAnswer">Show Answer</button>
     }
     else if (currentScreen.Equals("answerScreen"))
     {
+        <p>Correct Answer: @formattedAnswer</p>
 
-
-
+        <button @onclick="ShowScores">Show Scores</button>
     }
     else if (currentScreen.Equals("scoreScreen"))
     {
-
+        foreach (Tuple<string, int> scorePair in playerScores)
+        {
+            <ul>@scorePair.Item1 : @scorePair.Item2</ul>
+        
+        
+        }
 
     }
     else if (currentScreen.Equals("finalScoreScreen"))
@@ -64,6 +69,12 @@ else
     private string userCountry;
     private bool joinedLobby = false;
     private List<string> players;
+    private string formattedQuestion;
+    private string formattedAnswer;
+    private string pageTitle;
+    private int questionsPerPage = 10;
+    private List<Tuple<string, int>> playerScores;
+
 
     protected override async Task OnInitializedAsync()
     {
@@ -82,14 +93,33 @@ else
             players.Add(username);
             InvokeAsync(StateHasChanged);
         });
-        hubConnection.On<string, string>("RecieveQuestionHost", (formattedSentence, pagename) =>
+
+        hubConnection.On<string>("RecievePageTitle", pageTitle =>
         {
+            this.pageTitle = pageTitle;
+        });
+
+        hubConnection.On<string, string, string>("RecieveQuestionHost", (formattedQuestion, formattedAnswer, answer) =>
+        {
+            this.formattedQuestion = formattedQuestion;
+            this.formattedAnswer = formattedAnswer;
+
+
+            currentScreen = "questionScreen";
+            InvokeAsync(StateHasChanged);
+        });
+        hubConnection.On<List<Tuple<string, int>>>("RecieveScores", (playerScores) =>
+        {
+            this.playerScores = playerScores;
+            if (currentScreen.Equals("scoreScreen"))
+                InvokeAsync(StateHasChanged);
 
 
 
         });
 
-        
+
+
 
         await hubConnection.StartAsync();
         await hubConnection.SendAsync("DeclareHost");
@@ -100,15 +130,24 @@ else
 
 
 
-    private void StartGame()
+    private async void StartGame()
     {
-
-
+        await hubConnection.SendAsync("SendPageTitle");
+        if (pageTitle != null)
+            await hubConnection.SendAsync("SendQuestion", pageTitle);
 
     }
 
-    private async void GetQuestion(string formattedSentence, string pagename)
+    private void ShowAnswer()
     {
-        
+        currentScreen = "answerScreen";
+        InvokeAsync(StateHasChanged);
+    }
+
+    private void ShowScores()
+    {
+        currentScreen = "scoreScreen";
+        InvokeAsync(StateHasChanged);
+
     }
 }

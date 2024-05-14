@@ -16,11 +16,13 @@ namespace WikipediaQuizGenerator.Services
         public Dictionary<string, WikiPage> allWikiPages { get; set; } = new Dictionary<string, WikiPage>();
         public ISingleClientProxy ServerHost { get; set; }
         public string currentPageTitle;
+        public string currentQuestionAnswer;
         private int numberOfQuestionOptions = 8;
 
         public PlayerDataServices()
         {
 
+            LoadWikiPages("WikipediaUrls.txt");
         }
 
         public bool LoadWikiPages(string filename) 
@@ -28,7 +30,7 @@ namespace WikipediaQuizGenerator.Services
             try
             {
                 string binPath = Path.GetDirectoryName(AppDomain.CurrentDomain.BaseDirectory);
-                string filepath = binPath.Substring(0, binPath.Length - 26) + filename;
+                string filepath = binPath.Substring(0, binPath.Length - 39) + filename;
 
                 string[] urls = File.ReadAllLines(filepath);
                 foreach(string url in urls) 
@@ -79,6 +81,7 @@ namespace WikipediaQuizGenerator.Services
             }
 
             answer = sentencePair.Item2[random.Next(sentencePair.Item2.Count)];
+            currentQuestionAnswer = answer;
             formattedQuestion = sentencePair.Item1.Replace(answer, "________", StringComparison.OrdinalIgnoreCase);
             formattedAnswer = sentencePair.Item1;
 

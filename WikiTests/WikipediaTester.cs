@@ -24,7 +24,7 @@ namespace WikiTests
         public void TestReadFile()
         {
             //retrieves filepath of WikipediaUrls.txt
-   
+
             string binPath = Path.GetDirectoryName(AppDomain.CurrentDomain.BaseDirectory);
             string filepath = binPath.Substring(0, binPath.Length - 26) + "WikipediaUrls.txt";
             filepath = @"C:\Users\jense\source\repos\PersonalProjects\WikipediaQuizGenerator\WikipediaUrls.txt";
@@ -45,6 +45,15 @@ namespace WikiTests
             WikiPage page = new WikiPage("https://en.wikipedia.org/wiki/Japan");
 
             Console.WriteLine("no");
+        }
+
+        [TestMethod]
+        public void TestGeneratePageTitleOnePage() 
+        {
+            WikiPage page = new WikiPage("https://en.wikipedia.org/wiki/Japan");
+            page.
+
+
         }
     }
 }

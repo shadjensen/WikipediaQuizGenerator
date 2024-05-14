@@ -35,14 +35,18 @@
     {
         foreach(string keyword in keywords)
         {
-            <button @onclick="selectKeyword">@keyword</button>
+            <button @onclick="( () => selectKeyword(keyword) )">@keyword</button>
         }
 
     }
     else if (currentScreen.Equals("scoreScreen"))
     {
-
-
+        if(answerCorrect)
+        {
+            string correctMessage = correctMessages[random.Next(correctMessages.Length)];
+            <h3>@correctMessage</h3>
+        }
+        <p>Current score = @playerScore</p>
 
     }
     else
@@ -66,12 +70,18 @@ else
     private string username;
     private string userCountry;
     private bool joinedLobby = false;
+    private bool answerCorrect = false;
+    private Random random;
+    private int playerScore;
+
 
     private string[]? keywords;
+    private string[] correctMessages = new string[] {"", "", "", "", "" };
 
 
     protected override async Task OnInitializedAsync()
     {
+        random = new Random();
         keywords = new string[8];
         hubConnection = new HubConnectionBuilder()
         .WithUrl(NavigationManager.ToAbsoluteUri("/playerhub"))
@@ -89,8 +99,15 @@ else
             InvokeAsync(StateHasChanged);
         });
 
-        hubConnection.On<string[]>("RecieveAnswerOptions", answers =>
+
+
+        hubConnection.On<string[], int>("RecieveQuestionClient", (answers, numberOfOptions) =>
         {
+            List<int> options = new();
+            for (int i = 0; i < numberOfOptions; i++)
+                options.Add(i);
+
+
             for (int i = 0; i < 8; i++)
             {
                 keywords[i] = answers[i];             
@@ -99,6 +116,13 @@ else
             currentScreen = "playScreen";
             InvokeAsync(StateHasChanged);
 
+        });
+
+        hubConnection.On<bool, int>("RecieveAnswer", (answerCorrect, updatedScore) => 
+        {
+            playerScore = updatedScore;
+        
+    
         });
 
         await hubConnection.StartAsync();
@@ -113,9 +137,12 @@ else
         hubConnection.SendAsync("JoinLobby", username, userCountry);
     }
 
-    private void selectKeyword()
+    private void selectKeyword(string selectedWord)
     {
-        
-    
+        hubConnection.SendAsync("RecieveAnswer", username, selectedWord);
     }
+
+   
+
+
 }
