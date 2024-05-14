@@ -15,9 +15,11 @@ namespace WikipediaQuizGenerator.Services
         public Dictionary<string, int> PlayerScores { get; set; } = new Dictionary<string, int>();
         public Dictionary<string, WikiPage> allWikiPages { get; set; } = new Dictionary<string, WikiPage>();
         public ISingleClientProxy ServerHost { get; set; }
-        public string currentPageTitle;
-        public string currentQuestionAnswer;
-        private int numberOfQuestionOptions = 8;
+        public string currentPageTitle { get; set; }
+        public string currentQuestionAnswer { get; set; }
+        private int numberOfQuestionOptions { get; set; } = 8;
+        public bool recievingScores { get; set; } = false;
+
 
         public PlayerDataServices()
         {
@@ -72,7 +74,7 @@ namespace WikipediaQuizGenerator.Services
                 //only keep the sentence if there are at least two keywords in the sentence. This
                 //prevents the algorithm from picking "sentences" that are just keywords or getting
                 //sentences too short or incomplete to really use
-                if (sentencePair.Item2.Count > 2)
+                if (sentencePair.Item2.Count >= 2)
                 {
                     validSentence = true;
                 }

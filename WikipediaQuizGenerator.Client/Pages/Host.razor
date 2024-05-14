@@ -10,8 +10,10 @@
 {
     if (currentScreen.Equals("hostScreen"))
     {
-        <button @onclick="StartGame">Start Game</button>
-
+        if (pageTitle != null)
+        {
+            <button @onclick="StartGame">Start Game</button>
+        }
         foreach(string player in players)
         {
             <ul>@player</ul>
@@ -19,24 +21,32 @@
     }
     else if (currentScreen.Equals("questionScreen"))
     {
+        <h3>Current Page: @pageTitle</h3>
+
         <p>@formattedQuestion</p>
 
         <button @onclick="ShowAnswer">Show Answer</button>
     }
     else if (currentScreen.Equals("answerScreen"))
     {
+        <h3>Current Page: @pageTitle</h3>
+
         <p>Correct Answer: @formattedAnswer</p>
 
-        <button @onclick="ShowScores">Show Scores</button>
+        if (recievedScores)
+        {
+            <button @onclick="ShowScores">Show Scores</button>
+        }
     }
     else if (currentScreen.Equals("scoreScreen"))
     {
-        foreach (Tuple<string, int> scorePair in playerScores)
+        <h3>Scores</h3>
+        foreach (KeyValuePair<string, int> scorePair in playerScores)
         {
-            <ul>@scorePair.Item1 : @scorePair.Item2</ul>
-        
+            <ul>@scorePair.Key : @scorePair.Value</ul>        
         
         }
+        <button @onclick="SendQuestion"> Next Question</button>
 
     }
     else if (currentScreen.Equals("finalScoreScreen"))
@@ -73,7 +83,9 @@ else
     private string formattedAnswer;
     private string pageTitle;
     private int questionsPerPage = 10;
-    private List<Tuple<string, int>> playerScores;
+    private int currentQuestionFromPage = 0;
+    private List<KeyValuePair<string, int>> playerScores;
+    private bool recievedScores = false;
 
 
     protected override async Task OnInitializedAsync()
@@ -97,10 +109,12 @@ else
         hubConnection.On<string>("RecievePageTitle", pageTitle =>
         {
             this.pageTitle = pageTitle;
+            InvokeAsync(StateHasChanged);
         });
 
         hubConnection.On<string, string, string>("RecieveQuestionHost", (formattedQuestion, formattedAnswer, answer) =>
         {
+            recievedScores = false;
             this.formattedQuestion = formattedQuestion;
             this.formattedAnswer = formattedAnswer;
 
@@ -108,11 +122,12 @@ else
             currentScreen = "questionScreen";
             InvokeAsync(StateHasChanged);
         });
-        hubConnection.On<List<Tuple<string, int>>>("RecieveScores", (playerScores) =>
+        hubConnection.On<List<KeyValuePair<string, int>>>("RecieveScores", (playerScores) =>
         {
             this.playerScores = playerScores;
-            if (currentScreen.Equals("scoreScreen"))
-                InvokeAsync(StateHasChanged);
+            recievedScores = true;
+
+            InvokeAsync(StateHasChanged);
 
 
 
@@ -123,6 +138,8 @@ else
 
         await hubConnection.StartAsync();
         await hubConnection.SendAsync("DeclareHost");
+
+        await hubConnection.SendAsync("SendPageTitle");
     }
 
 
@@ -132,19 +149,40 @@ else
 
     private async void StartGame()
     {
-        await hubConnection.SendAsync("SendPageTitle");
+
         if (pageTitle != null)
-            await hubConnection.SendAsync("SendQuestion", pageTitle);
+            SendQuestion();
+        else
+            await hubConnection.SendAsync("SendPageTitle");
 
     }
 
-    private void ShowAnswer()
+    private async void SendQuestion()
     {
+        if (currentQuestionFromPage < 10)
+        {
+            await hubConnection.SendAsync("SendQuestion", pageTitle);
+
+            currentQuestionFromPage++;
+        }
+        else
+        {
+            await hubConnection.SendAsync("SendPageTitle");
+
+            currentQuestionFromPage = 0;
+
+            SendQuestion();
+        }
+    }
+
+    private async void ShowAnswer()
+    {
+        await hubConnection.SendAsync("SendScores");
         currentScreen = "answerScreen";
         InvokeAsync(StateHasChanged);
     }
 
-    private void ShowScores()
+    private async void ShowScores()
     {
         currentScreen = "scoreScreen";
         InvokeAsync(StateHasChanged);

@@ -51,7 +51,7 @@ namespace WikiTests
         public void TestGeneratePageTitleOnePage() 
         {
             WikiPage page = new WikiPage("https://en.wikipedia.org/wiki/Japan");
-            page.
+            
 
 
         }

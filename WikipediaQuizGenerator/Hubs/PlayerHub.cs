@@ -64,14 +64,30 @@ namespace WikipediaQuizGenerator.Hubs
             if (playerDataServices != null)
             {
                 playerDataServices.generateQuestion(pageTitle, out string formattedQuestion, out string formattedAnswer, out string[] questionOptions, out string answer);
+                playerDataServices.recievingScores = true;
 
-                await Clients.All.SendAsync("RecieveQuestionClient", questionOptions);
+                await Clients.All.SendAsync("RecieveQuestionClient", questionOptions, answer);
                 await playerDataServices.ServerHost.SendAsync("RecieveQuestionHost", formattedQuestion, formattedAnswer, answer);
             }
 
         }
 
-        public async void RecieveAnswer(string username, string answer) 
+        public async Task SendScores() 
+        {
+            PlayerDataServices? playerDataServices = serviceProvider.GetService<PlayerDataServices>();
+            if (playerDataServices != null) 
+            {
+                List<KeyValuePair<string, int>> scoreList = playerDataServices.PlayerScores.ToList();
+                await playerDataServices.ServerHost.SendAsync("RecieveScores", scoreList);
+                await Clients.All.SendAsync("ShowClientScores");
+            
+            
+            }
+
+
+        }
+
+        public async void SendAnswer(string username, string answer) 
         {
             PlayerDataServices? playerDataServices = serviceProvider.GetService<PlayerDataServices>();
             if (playerDataServices != null) 
@@ -80,17 +96,18 @@ namespace WikipediaQuizGenerator.Hubs
                 if (playerDataServices.currentQuestionAnswer.Equals(answer))
                 {
                     playerDataServices.PlayerScores[username]++;
-                    await Clients.Caller.SendAsync("SendClientScore", true, playerDataServices.PlayerScores[username]);
+                    await Clients.Caller.SendAsync("RecieveClientScore", true, playerDataServices.PlayerScores[username]);
                 }
                 else 
                 {                    
-                    await Clients.Caller.SendAsync("SendClientScore", false, playerDataServices.PlayerScores[username]);
+                    await Clients.Caller.SendAsync("RecieveClientScore", false, playerDataServices.PlayerScores[username]);
                 }
 
 
             }
 
         }
+
 
 
 

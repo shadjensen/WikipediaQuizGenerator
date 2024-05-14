@@ -33,18 +33,39 @@
     }
     else if (currentScreen.Equals("playScreen"))
     {
-        foreach(string keyword in keywords)
+        if (!keywordIsSelected)
         {
-            <button @onclick="( () => selectKeyword(keyword) )">@keyword</button>
+            foreach(string keyword in keywords)
+            {
+                <button @onclick="( () => selectKeyword(keyword) )">@keyword</button>
+            }
+        }
+        else
+        {
+            <p> Waiting for other responses...</p>
+        
+        
         }
 
     }
     else if (currentScreen.Equals("scoreScreen"))
     {
-        if(answerCorrect)
+        if (answerSubmitted)
         {
-            string correctMessage = correctMessages[random.Next(correctMessages.Length)];
-            <h3>@correctMessage</h3>
+            if(answerCorrect)
+            {
+                <h3>@correctMessages[random.Next(correctMessages.Length)]</h3>
+            }
+            else
+            {
+                <h3>@incorrectMessages[random.Next(incorrectMessages.Length)]</h3>
+
+            }
+        }
+        else
+        {
+            <h3>@noAnswerMessages[random.Next(noAnswerMessages.Length)]</h3>    
+        
         }
         <p>Current score = @playerScore</p>
 
@@ -71,12 +92,16 @@ else
     private string userCountry;
     private bool joinedLobby = false;
     private bool answerCorrect = false;
+    private bool keywordIsSelected = false;
+    private bool answerSubmitted = false;
     private Random random;
     private int playerScore;
-
+    private string correctAnswer;
 
     private string[]? keywords;
-    private string[] correctMessages = new string[] {"", "", "", "", "" };
+    private string[]? correctMessages;
+    private string[]? incorrectMessages;
+    private string[]? noAnswerMessages;
 
 
     protected override async Task OnInitializedAsync()
@@ -101,11 +126,15 @@ else
 
 
 
-        hubConnection.On<string[], int>("RecieveQuestionClient", (answers, numberOfOptions) =>
+        hubConnection.On<string[], string>("RecieveQuestionClient", (answers, correctAnswer) =>
         {
+            answerSubmitted = false;
+            keywordIsSelected = false;
+            this.correctAnswer = correctAnswer;
             List<int> options = new();
-            for (int i = 0; i < numberOfOptions; i++)
+            for (int i = 0; i < options.Count; i++)
                 options.Add(i);
+
 
 
             for (int i = 0; i < 8; i++)
@@ -118,14 +147,23 @@ else
 
         });
 
-        hubConnection.On<bool, int>("RecieveAnswer", (answerCorrect, updatedScore) => 
+        hubConnection.On<bool, int>("RecieveClientScore", (answerCorrect, updatedScore) => 
         {
+            this.answerCorrect = answerCorrect;
             playerScore = updatedScore;
-        
-    
+
+
+        });
+
+        hubConnection.On("ShowClientScores", () => 
+        {
+            currentScreen = "scoreScreen";
+            InvokeAsync(StateHasChanged);
         });
 
         await hubConnection.StartAsync();
+
+
     }
 
     Task Send() => hubConnection.SendAsync("JoinLobby", username, userCountry);
@@ -139,8 +177,49 @@ else
 
     private void selectKeyword(string selectedWord)
     {
-        hubConnection.SendAsync("RecieveAnswer", username, selectedWord);
+        answerSubmitted = true;
+        keywordIsSelected = true;
+        hubConnection.SendAsync("SendAnswer", username, selectedWord);
+        InvokeAsync(StateHasChanged);
     }
+
+    private void defineResponses()
+    {
+    correctMessages = new string[] { "Congratulations, you're officially the trivia champ! Time to update that resume.",
+                                     "You're crushing it! I'd ask for your autograph, but I left my pen in the quiz locker.",
+                                     "Well, look at you, Einstein! Next stop: solving the mysteries of the universe.",
+                                     "Who's the trivia genius? You are! Prepare for the paparazzi, they'll want a piece of this!",
+                                     "You've got more answers than Google! Impressive!",
+                                     "Bravo! You've just earned your Ph.D. in Trivia-ology.",
+                                     "You're on fire! Quick, someone call the trivia extinguisher!",
+                                     "You're like a walking encyclopedia, but way more fun!",
+                                     "You're like a trivia superhero, swooping in with the correct answer!",
+                                     "By the power of Grayskull! You've unlocked the right answer!"};
+
+    incorrectMessages = new string[] {"Oops! That's not quite it, but hey, even Einstein had off days!",
+                                      "Close, but no cigar! Don't worry, even the best stumble now and then.",
+                                      "Not quite! But don't give up, you're just one step closer to becoming a trivia master!",
+                                      "Whoops-a-daisy! That answer's as elusive as Bigfoot!",
+                                      "Not quite the jackpot! But hey, you're still a winner in our book!",
+                                      "Oopsie-doodle! That answer's like trying to find a needle in a haystack.",
+                                      "Missed it by a hair! But fear not, the next question is yours to conquer!",
+                                      "Almost there! Keep swinging, you're bound to hit a home run soon!",
+                                      "Not the droid we were looking for! But hey, R2-D2 approves of your effort!",
+                                      "Uh-oh, that answer's as elusive as Waldo in a crowd! Keep searching!"};
+
+    noAnswerMessages = new string[] {"Alas, poor answer! It missed its cue. Onward to the next scene!",
+                                     "The answer that never was, like a ghost in Hamlet's castle! Next question, our stage awaits!",
+                                     "No answer? Must be caught in a Kafkaesque labyrinth! Next question, let's find our way out!",
+                                     "The answer's playing hide and seek, channeling its inner Gatsby! Next question, let's uncover the mystery!",
+                                     "Answer lost in Wonderland, chasing rabbits! Next question, let's follow the white rabbit to victory!",
+                                     "No answer? Sounds like a tale from the Canterbury Trails! Next question, our pilgrimage continues!",
+                                     "The answer's on a quest, like Don Quixote chasing windmills! Next question, our adventure awaits!",
+                                     "No answer, like a page torn from the Odyssey! Fear not, our epic journey continues with the next question!",
+                                     "The answer's a whisper in the breeze, like Poe's raven! Next question, let's heed the call!",
+                                     "Answer adrift in the sea of time, like Captain Ahab's white whale! Next question, our hunt continues!"};
+         
+    }
+
 
    
 
