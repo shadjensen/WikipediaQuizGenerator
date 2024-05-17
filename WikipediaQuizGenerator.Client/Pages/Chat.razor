@@ -38,7 +38,7 @@
         {
             foreach(string keyword in keywords)
             {
-                <button @onclick="( () => selectKeyword(keyword) )">@keyword</button>
+                <button @onclick="( () => selectKeyword(keyword) )">@capitalizeFirstCharacter(keyword)</button>
             }
         }
         else
@@ -227,7 +227,17 @@ else
         if ((placing % 10) == 3)
             return placing + "rd";
         return placing + "th";   
-    
+
+    }
+
+    private string capitalizeFirstCharacter(string word)
+    {
+        if (word == null || word.Equals(""))
+            return "";
+        else if (word.Length == 1)
+            return char.ToUpper(word[0]).ToString();
+
+        return char.ToUpper(word[0]) + word.Substring(1);
     }
 
     private void defineResponses()

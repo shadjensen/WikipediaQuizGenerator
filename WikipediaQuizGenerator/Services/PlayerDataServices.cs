@@ -101,8 +101,12 @@ namespace WikipediaQuizGenerator.Services
                      * we want to pull options from surrounding sentences, so we grab keywords with an an adjustable pull range. This range is X keywords before and after 
                      * our answer's index. It's important to remember that many sentences including our answer sentence will include multiple keywords so having too short of
                      * a range will only pull from a few sentences. A sentence might have 8 or 9 keywords in it, so even a pull range of 20 might actually only span 4 sentences.
+                     * 
+                     * It's not horrible if words that appear in the sentence appear as keywords, but it's not ideal as context often allows you to rule those out. To remedy this we
+                     * adjust the pull range based on how many key words are in the answe sentence. It's ideal if the range is as small as possible while still maximing the chance
+                     * the words don't appear in the base sentence. This can be adjusted and fine tuned.
                     **/
-                    int pullRange = 20;
+                    int pullRange = sentencePair.Item2.Count * 5;
                     int optionIndex = random.Next(pullRange * 2) - pullRange + answerIndex;
                     while ((optionIndex < 0) || (optionIndex >= wikiPage.allKeywords.Count) || (optionIndex == answerIndex))
                             optionIndex = random.Next(20) - 10 + answerIndex;

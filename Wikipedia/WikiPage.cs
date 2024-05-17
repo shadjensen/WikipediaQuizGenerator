@@ -75,6 +75,7 @@ namespace Wikipedia
 
                         if (c ==  '>')
                             inTag = false;
+
                     }
 
 
@@ -82,6 +83,8 @@ namespace Wikipedia
                     Regex regex = new Regex(@"&#.*?;\s");
                     string formattedSentence = regex.Replace(formattedSentenceBuilder.ToString(), " ");
                     formattedSentence = Regex.Replace(formattedSentence, @"&#.*?;", "") + ".";
+                    //add back in the periods that acted as decimals and such
+                    formattedSentence = formattedSentence.Replace("_", ".");
 
 
                     //creates a list of link words in each sentence
@@ -103,7 +106,11 @@ namespace Wikipedia
                                 string remainingSubsentence = sentence.Substring(linkIndex + indexPointer);
                                 int wordLength = remainingSubsentence.IndexOf("<") ;
                                 if (wordLength > 0)
-                                    keywords.Add(sentence.Substring(linkIndex + indexPointer, wordLength));
+                                {
+                                    string keyword = sentence.Substring(linkIndex + indexPointer, wordLength);
+                                    //add back in the periods that will act as periods in names or decimals
+                                    keywords.Add(keyword.Replace("_", "."));
+                                }
                                 indexPointer = linkIndex + wordLength + indexPointer;
                             }
                             else
