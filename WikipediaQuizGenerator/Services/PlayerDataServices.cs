@@ -82,6 +82,7 @@ namespace WikipediaQuizGenerator.Services
                     pageIndex = random.Next(wikiPage.sentencePairs.Count);
             }
 
+            
             answer = sentencePair.Item2[random.Next(sentencePair.Item2.Count)];
             currentQuestionAnswer = answer;
             formattedQuestion = sentencePair.Item1.Replace(answer, "________", StringComparison.OrdinalIgnoreCase);
@@ -90,17 +91,51 @@ namespace WikipediaQuizGenerator.Services
 
             //select enough options for players to choose, minus one so we can ensure one is the answer
             string[] options = new string[numberOfQuestionOptions];
+            int answerIndex = wikiPage.allKeywords.IndexOf(answer);
             for (int i = 0; i < numberOfQuestionOptions-1; i++) 
             {
                 bool foundWord = false;
                 while (!foundWord) {
-                    string option = wikiPage.allKeywords[random.Next(wikiPage.allKeywords.Count)];
-                    //ensures there are no duplicates within the options array
-                    if (!options.Contains(option) && !option.Equals(answer)) 
+
+                    /**
+                     * we want to pull options from surrounding sentences, so we grab keywords with an an adjustable pull range. This range is X keywords before and after 
+                     * our answer's index. It's important to remember that many sentences including our answer sentence will include multiple keywords so having too short of
+                     * a range will only pull from a few sentences. A sentence might have 8 or 9 keywords in it, so even a pull range of 20 might actually only span 4 sentences.
+                    **/
+                    int pullRange = 20;
+                    int optionIndex = random.Next(pullRange * 2) - pullRange + answerIndex;
+                    while ((optionIndex < 0) || (optionIndex >= wikiPage.allKeywords.Count) || (optionIndex == answerIndex))
+                            optionIndex = random.Next(20) - 10 + answerIndex;
+
+                    string option = wikiPage.allKeywords[optionIndex];
+
+                    if (!options.Contains(option) && (!option.Equals(answer))) 
                     {
                         options[i] = option;
                         foundWord = true;
                     }
+
+
+                    /**
+
+                    //string option = wikiPage.allKeywords[random.Next(wikiPage.allKeywords.Count)];
+                    int chosenSentenceIndex = 0;
+                    while ((chosenSentenceIndex == 0) || (chosenSentenceIndex < -1) || (chosenSentenceIndex > wikiPage.sentencePairs.Count))
+                        chosenSentenceIndex = pageIndex + random.Next(12) - 6;
+
+                    Tuple<string, List<string>> chosenSentence = wikiPage.sentencePairs[chosenSentenceIndex];
+
+                    string option = chosenSentence.Item2[random.Next(chosenSentence.Item2.Count)];
+
+
+                    //ensures there are no duplicates within the options array
+                    if (!options.Contains(option) && !option.Equals(answer) || chosenSentence.Item1.Contains(option)) 
+                    {
+                        options[i] = option;
+                        foundWord = true;
+                    }
+
+                    **/
                 }
             }
             //fill the last slot with the correct answer
