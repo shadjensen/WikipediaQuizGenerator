@@ -10,14 +10,43 @@
 {
     if (currentScreen.Equals("hostScreen"))
     {
+        <h3></h3>
         if (pageTitle != null)
         {
             <button @onclick="StartGame">Start Game</button>
+            <button @onclick="OpenOptions">Options</button>
         }
         foreach(string player in players)
         {
             <ul>@player</ul>
         }
+    }
+    else if (currentScreen.Equals("optionsScreen"))
+    {
+        <div>
+            <p>End On Score: </p>
+            <input type="checkbox" @bind="endOnScore" />
+        </div>
+        if (endOnScore)
+        {
+            <div>
+                <p>Score To Win:</p>
+                <input type="number" @bind="scoreToWin" />
+            </div>
+        }
+        else
+        {
+            <div>
+                <p>Number of Questions:</p>
+                <input type="number" @bind="totalQuestions" />
+            </div>
+        }
+        <div>
+            <p>Questions Per Page:</p>
+            <input type="number" @bind="questionsPerPage" />
+        </div>
+
+        <button @onclick="ShowLobby">Return to Lobby</button>
     }
     else if (currentScreen.Equals("questionScreen"))
     {
@@ -43,15 +72,30 @@
         <h3>Scores</h3>
         foreach (KeyValuePair<string, int> scorePair in playerScores)
         {
-            <ul>@scorePair.Key : @scorePair.Value</ul>        
-        
-        }
-        <button @onclick="SendQuestion"> Next Question</button>
+            <ul>@scorePair.Key : @scorePair.Value</ul>
 
+        }
+
+        <!-- If the game should be over, do not load another question, but instead prompt the final score -->
+        if (!WinConditionMet())
+        {
+            <button @onclick="SendQuestion"> Next Question</button>
+        }
+        else
+        {
+            <button @onclick="ShowFinalScore"> View Final Score</button>
+
+
+        }
     }
     else if (currentScreen.Equals("finalScoreScreen"))
     {
+        <h3>Final score</h3>
+        foreach (KeyValuePair<string, int> pair in playerScores)
+        {
+            <ol>@pair.Key : @pair.Value</ol>         
 
+        }
 
 
 
@@ -61,6 +105,7 @@
     else
     {
         //this is only reached if there is an error    
+        <h3> there has been an error </h3>
     
     }
 
@@ -82,7 +127,12 @@ else
     private string formattedQuestion;
     private string formattedAnswer;
     private string pageTitle;
+    private bool endOnScore;
+    private bool gameFinished = false;
     private int questionsPerPage = 10;
+    private int scoreToWin = 10;
+    private int totalQuestions = 20;
+    private int currentQuestionNumber = 0;
     private int currentQuestionFromPage = 0;
     private List<KeyValuePair<string, int>> playerScores;
     private bool recievedScores = false;
@@ -124,9 +174,12 @@ else
         });
         hubConnection.On<List<KeyValuePair<string, int>>>("RecieveScores", (playerScores) =>
         {
-            this.playerScores = playerScores;
-            recievedScores = true;
+            //sorts scores so that the first displayed is the highest player's score
+            this.playerScores = playerScores.OrderByDescending(kv => kv.Value).ToList();
 
+
+            recievedScores = true;
+            currentQuestionNumber++;
             InvokeAsync(StateHasChanged);
 
 
@@ -145,7 +198,16 @@ else
 
     public bool IsConnected => hubConnection.State == HubConnectionState.Connected;
 
+    private async void OpenOptions()
+    {
+        currentScreen = "optionsScreen";
+        InvokeAsync(StateHasChanged);
 
+    }
+    private async void ShowLobby()
+    {
+        currentScreen = "hostScreen";    
+    }
 
     private async void StartGame()
     {
@@ -186,6 +248,38 @@ else
     {
         currentScreen = "scoreScreen";
         InvokeAsync(StateHasChanged);
+    }
+
+    private async void ShowFinalScore()
+    {
+        await hubConnection.SendAsync("SendFinalScores");
+        currentScreen = "finalScoreScreen";    
 
     }
+
+    private bool WinConditionMet()
+    {
+        if (endOnScore)
+        {
+            if (this.playerScores.Count > 0)
+            {
+                //because we populate playerScores in sorted order, we only need to check the top player for the score win condition
+                if (this.playerScores[0].Value > scoreToWin)
+                    return true;
+                else
+                    return false;
+            }
+        }
+        else
+        {
+            if (currentQuestionNumber >= totalQuestions)
+                return true;
+            else
+                return false;
+        }
+
+        //this will really only be met if a score win condition is set but no players have joined yet
+        return false;    
+    }
+
 }

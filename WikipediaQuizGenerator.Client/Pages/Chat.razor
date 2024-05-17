@@ -4,11 +4,12 @@
 
 @rendermode InteractiveWebAssembly
 
-<h3>Chat</h3>
+<h3>Player</h3>
 
 @if (IsConnected)
 {
-    if (currentScreen.Equals("joinScreen"))
+
+    if (currentScreen.Equals("joinScreen") || joinedLobby == false)
     {
 
     <input type="text" @bind="username" />
@@ -70,6 +71,12 @@
         <p>Current score = @playerScore</p>
 
     }
+    else if (currentScreen.Equals("finalScoreScreen"))
+    {
+        
+        <p>Congratulations you placed @generatePlacing(playerPlacing)</p>
+
+    }
     else
     {
         //this is only reached if an error has occured    
@@ -96,6 +103,7 @@ else
     private bool answerSubmitted = false;
     private Random random;
     private int playerScore;
+    private int playerPlacing;
     private string correctAnswer;
 
     private string[]? keywords;
@@ -112,13 +120,14 @@ else
         .WithUrl(NavigationManager.ToAbsoluteUri("/playerhub"))
         .Build();
 
-
+        defineResponses();
 
         hubConnection.On<string>("LobbyJoined", username =>
         {
             if (username.Equals("Could not resolve playerDataServices"))
                 currentScreen = "Error";
 
+            joinedLobby = true;
             currentScreen = "waitScreen";
             messages.Add(username);
             InvokeAsync(StateHasChanged);
@@ -132,12 +141,12 @@ else
             keywordIsSelected = false;
             this.correctAnswer = correctAnswer;
             List<int> options = new();
-            for (int i = 0; i < options.Count; i++)
+            for (int i = 0; i < answers.Length; i++)
                 options.Add(i);
 
 
 
-            for (int i = 0; i < 8; i++)
+            for (int i = 0; i < answers.Length; i++)
             {
                 keywords[i] = answers[i];             
             }
@@ -155,10 +164,34 @@ else
 
         });
 
-        hubConnection.On("ShowClientScores", () => 
+        hubConnection.On<string>("ShowClientScores", cancellationToken=> 
         {
             currentScreen = "scoreScreen";
             InvokeAsync(StateHasChanged);
+        });
+
+        hubConnection.On<List<KeyValuePair<string, int>>>("ShowClientFinalScore", (playerScores) =>
+        {
+            playerPlacing = 0;
+            for (int i = 0; i < playerScores.Count; i++)
+            {
+                if (playerScores[i].Key.Equals(username))
+                {
+                    //if the player is in 3rd place, it will appear in index 2 of the list so we must add 1 to account for this.
+                    playerPlacing = i + 1;    
+
+                }
+
+
+            }
+
+            if (playerPlacing > 0)
+                playerScore = playerScores[playerPlacing - 1].Value;
+
+            currentScreen = "finalScoreScreen";
+            InvokeAsync(StateHasChanged);
+
+
         });
 
         await hubConnection.StartAsync();
@@ -181,6 +214,21 @@ else
         keywordIsSelected = true;
         hubConnection.SendAsync("SendAnswer", username, selectedWord);
         InvokeAsync(StateHasChanged);
+    }
+
+
+    private string generatePlacing(int placing)
+    {
+        if (placing == 0)
+            return "0th";
+        if ((placing % 10) == 1)
+            return placing + "st";
+        if ((placing % 10) == 2)
+            return placing + "nd";
+        if ((placing % 10) == 3)
+            return placing + "rd";
+        return placing + "th";   
+    
     }
 
     private void defineResponses()

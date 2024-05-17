@@ -79,11 +79,25 @@ namespace WikipediaQuizGenerator.Hubs
             {
                 List<KeyValuePair<string, int>> scoreList = playerDataServices.PlayerScores.ToList();
                 await playerDataServices.ServerHost.SendAsync("RecieveScores", scoreList);
-                await Clients.All.SendAsync("ShowClientScores");
+                await Clients.All.SendAsync("ShowClientScores", null);
             
             
             }
 
+
+        }
+
+        public async Task SendFinalScores() 
+        {
+            PlayerDataServices? playerDataServices = serviceProvider.GetService<PlayerDataServices>();
+            if (playerDataServices != null)
+            {
+                List<KeyValuePair<string, int>> scoreList = playerDataServices.PlayerScores.ToList();
+                await playerDataServices.ServerHost.SendAsync("RecieveScores", scoreList);
+                await Clients.All.SendAsync("ShowClientFinalScore", scoreList);
+
+
+            }
 
         }
 
