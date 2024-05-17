@@ -94,12 +94,16 @@ namespace Wikipedia
                         {
                         
                             linkIndex = sentence.Substring(indexPointer).IndexOf("title=\"") + 7;
+                            //the base return is -1 if no sample string is found, so if the link index is less than or equal to 7 none is found as 7 is the addition from "title="
                             if (linkIndex >= 7)
                             {
+                                //this finds the index of the close carrot after the index of title= and adds one so the word does not include the >
+                                linkIndex = sentence.Substring(indexPointer + linkIndex).IndexOf(">") + linkIndex + 1;
                                 int sentenceLength = sentence.Length - 1;
                                 string remainingSubsentence = sentence.Substring(linkIndex + indexPointer);
-                                int wordLength = remainingSubsentence.IndexOf("\"");
-                                keywords.Add(sentence.Substring(linkIndex + indexPointer, wordLength));
+                                int wordLength = remainingSubsentence.IndexOf("<") ;
+                                if (wordLength > 0)
+                                    keywords.Add(sentence.Substring(linkIndex + indexPointer, wordLength));
                                 indexPointer = linkIndex + wordLength + indexPointer;
                             }
                             else

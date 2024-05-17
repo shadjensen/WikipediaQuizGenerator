@@ -141,15 +141,14 @@ else
             keywordIsSelected = false;
             this.correctAnswer = correctAnswer;
             List<int> options = new();
-            for (int i = 0; i < answers.Length; i++)
-                options.Add(i);
-
-
 
             for (int i = 0; i < answers.Length; i++)
             {
                 keywords[i] = answers[i];             
             }
+
+            keywords = keywords.OrderBy(x => random.Next()).ToArray();
+
 
             currentScreen = "playScreen";
             InvokeAsync(StateHasChanged);
@@ -264,8 +263,7 @@ else
                                      "The answer's on a quest, like Don Quixote chasing windmills! Next question, our adventure awaits!",
                                      "No answer, like a page torn from the Odyssey! Fear not, our epic journey continues with the next question!",
                                      "The answer's a whisper in the breeze, like Poe's raven! Next question, let's heed the call!",
-                                     "Answer adrift in the sea of time, like Captain Ahab's white whale! Next question, our hunt continues!"};
-         
+                                     "Answer adrift in the sea of time, like Captain Ahab's white whale! Next question, our hunt continues!"};         
     }
 
 
