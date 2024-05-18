@@ -34,13 +34,21 @@ namespace WikipediaQuizGenerator.Hubs
 
             if (playerDataServices != null)
             {
-                //we add the player to our three libraries, and set their initial score to zero
-                playerDataServices.Players.Add(username);
-                playerDataServices.PlayerCountries.Add(username, userCountry);
-                playerDataServices.PlayerScores.Add(username, 0);
+                if (playerDataServices.ServerHost != null)
+                {
 
-                await Clients.Caller.SendAsync("LobbyJoined", username);
-                await playerDataServices.ServerHost.SendAsync("LobbyJoined", username);
+                    //we add the player to our three libraries, and set their initial score to zero
+                    playerDataServices.Players.Add(username);
+                    playerDataServices.PlayerCountries.Add(username, userCountry);
+                    playerDataServices.PlayerScores.Add(username, 0);
+
+                    await Clients.Caller.SendAsync("LobbyJoined", username);
+                    await playerDataServices.ServerHost.SendAsync("LobbyJoined", username);
+                }
+                else 
+                {
+                    await Clients.Caller.SendAsync("NoLobbyHost", username);
+                }
             }
             else
                 await Clients.Caller.SendAsync("LobbyJoined", "Could not resolve playerDataServices");

@@ -12,19 +12,18 @@
     if (currentScreen.Equals("joinScreen") || joinedLobby == false)
     {
 
-    <input type="text" @bind="username" />
-    <input type="text" @bind="userCountry" />
-    <button @onclick="JoinLobby">Send</button>
-    <h3>@joinedLobby</h3>
+        <input type="text" @bind="username" />
+        <input type="text" @bind="userCountry" />
+        <button @onclick="JoinLobby">Send</button>
+        <h3>@joinedLobby</h3>
 
-    <ul id="messagesList">
-        @foreach (string message in messages)
+        if (!foundHost)
         {
-            <li>@message</li>
+            <p>Could not join lobby as there was no found host</p>    
+        
         }
 
-
-        </ul>
+    
     }
     else if (currentScreen.Equals("waitScreen"))
     {
@@ -94,10 +93,10 @@ else
 @code {
     private string currentScreen = "joinScreen";
     private HubConnection hubConnection;
-    private List<string> messages = new List<string>();
     private string username;
     private string userCountry;
     private bool joinedLobby = false;
+    private bool foundHost = true;
     private bool answerCorrect = false;
     private bool keywordIsSelected = false;
     private bool answerSubmitted = false;
@@ -130,7 +129,16 @@ else
 
             joinedLobby = true;
             currentScreen = "waitScreen";
-            messages.Add(username);
+            InvokeAsync(StateHasChanged);
+        });
+
+        hubConnection.On<string>("NoLobbyHost", username =>
+        {
+            if (username.Equals("Could not resolve playerDataServices"))
+                currentScreen = "Error";
+
+            joinedLobby = false;
+            foundHost = false;
             InvokeAsync(StateHasChanged);
         });
 
