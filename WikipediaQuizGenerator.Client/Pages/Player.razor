@@ -4,7 +4,7 @@
 
 @rendermode InteractiveWebAssembly
 
-<h3>Player</h3>
+<h3>@username</h3>
 
 @if (IsConnected)
 {
@@ -114,6 +114,7 @@ else
 
     protected override async Task OnInitializedAsync()
     {
+        username = "";
         random = new Random();
         keywords = new string[8];
         hubConnection = new HubConnectionBuilder()
