@@ -1,0 +1,6 @@
+﻿body {
+}
+
+b, strong {
+    font-weight: bold; /* Ensure this is set */
+}

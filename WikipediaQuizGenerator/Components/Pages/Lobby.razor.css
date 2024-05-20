@@ -24,3 +24,7 @@
     padding-right: 0rem;
     padding-left: 0rem;
 }
+
+b, strong {
+    font-weight: bold; /* Ensure this is set */
+}

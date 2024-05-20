@@ -22,9 +22,18 @@ namespace WikipediaQuizGenerator.Hubs
                 playerDataServices.ServerHost = Clients.Caller;
         }
 
-        public async Task SendMessage(string user, string message)
+        public override async Task OnDisconnectedAsync(Exception exception) 
         {
-            await Clients.All.SendAsync("RecieveMessage", user, message);
+            var userId = Context.UserIdentifier;
+
+            //check if the disconnection was the host. If so, declare the host null in playerDataServices
+            PlayerDataServices? playerDataServices = serviceProvider.GetService<PlayerDataServices>();
+            if (playerDataServices != null) 
+            { 
+                
+                //-TODO:check for host disconnection
+
+            }
 
         }
 
@@ -71,13 +80,35 @@ namespace WikipediaQuizGenerator.Hubs
             PlayerDataServices? playerDataServices = serviceProvider.GetService<PlayerDataServices>();
             if (playerDataServices != null)
             {
-                playerDataServices.generateQuestion(pageTitle, out string formattedQuestion, out string formattedAnswer, out string[] questionOptions, out string answer);
+                playerDataServices.generateQuestion(pageTitle, out string formattedQuestion, out string formattedAnswer, out string[] questionOptions, out string answer, out int sentenceIndex);
                 playerDataServices.recievingScores = true;
 
                 await Clients.All.SendAsync("RecieveQuestionClient", questionOptions, answer);
-                await playerDataServices.ServerHost.SendAsync("RecieveQuestionHost", formattedQuestion, formattedAnswer, answer);
+                await playerDataServices.ServerHost.SendAsync("RecieveQuestionHost", formattedQuestion, formattedAnswer, answer, sentenceIndex);
             }
 
+        }
+
+        public async Task SendQuestionContext(string pageTitle, int sentenceIndex) 
+        {
+            PlayerDataServices? playerDataServices = serviceProvider.GetService<PlayerDataServices>();
+            if (playerDataServices != null)
+            {
+                WikiPage page = playerDataServices.allWikiPages[pageTitle];
+
+                //the sentence before our answer
+                string preceedingSentence ="";
+                //the sentence after our answer
+                string proceedingSentence ="";
+                if (sentenceIndex > 0)
+                    preceedingSentence = page.sentencePairs[sentenceIndex - 1].Item1;
+                if (sentenceIndex < page.sentencePairs.Count - 2)
+                    proceedingSentence = page.sentencePairs[sentenceIndex + 1].Item1;
+
+                await playerDataServices.ServerHost.SendAsync("RecieveQuestionContext", preceedingSentence, proceedingSentence);
+
+
+            }
         }
 
         public async Task SendScores() 

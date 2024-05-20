@@ -1,15 +1,30 @@
 ﻿@page "/host"
 @using Microsoft.AspNetCore.SignalR.Client
+@using System.Net
+@using System.Net.NetworkInformation
+@using System.Net.Sockets
 @inject NavigationManager NavigationManager
 
 @rendermode InteractiveWebAssembly
 
-<h3>Host</h3>
+<script>
+    async function getHostIpAddress() {
+        const response = await fetch('https://api.ipify.org?format=json');
+        const data = await response.json();
+        return data.ip;
+    }
+</script>
+
+
+<h3>@localIPv4</h3>
 
 @if (IsConnected)
 {
     if (currentScreen.Equals("hostScreen"))
     {
+        <!-- https://media.istockphoto.com/id/1165287336/vector/world-map-dot-illustration-on-blue-background.jpg?s=612x612&w=0&k=20&c=x7Erj7DgRzsvKlSRwZgueDPRNJshUf3wTvOSwifxfMY= -->
+
+
         <h3></h3>
         if (pageTitle != null)
         {
@@ -23,6 +38,9 @@
     }
     else if (currentScreen.Equals("optionsScreen"))
     {
+        <p>Lobby Name: </p>
+        <input type="text" @bind=localIPv4 />
+
         <div>
             <p>End On Score: </p>
             <input type="checkbox" @bind="endOnScore" />
@@ -46,11 +64,16 @@
             <input type="number" @bind="questionsPerPage" />
         </div>
 
+        
+
         <button @onclick="ShowLobby">Return to Lobby</button>
     }
     else if (currentScreen.Equals("questionScreen"))
     {
-        <h3>Current Page: @pageTitle</h3>
+        <div class="host-top-bar">
+            <p>Current Page: @pageTitle</p>
+            <p>Question #: @currentQuestionNumber</p>
+        </div>
 
         <p>@formattedQuestion</p>
 
@@ -58,9 +81,17 @@
     }
     else if (currentScreen.Equals("answerScreen"))
     {
-        <h3>Current Page: @pageTitle</h3>
+        <div class="host-top-bar">
+            <p>Current Page: @pageTitle</p>
+            <p>Question #: @currentQuestionNumber</p>
+        </div>
 
-        <p>Correct Answer: @formattedAnswer</p>
+        <p>Correct Answer:</p>
+        <div class="correct-answer-expanded">
+            <p>@((MarkupString)formattedAnswer)</p>
+        </div>
+
+
 
         if (recievedScores)
         {
@@ -69,6 +100,11 @@
     }
     else if (currentScreen.Equals("scoreScreen"))
     {
+        <div class="host-top-bar">
+            <p>Current Page: @pageTitle</p>
+            <p>Question #: @currentQuestionNumber</p>
+        </div>
+
         <h3>Scores</h3>
         foreach (KeyValuePair<string, int> scorePair in playerScores)
         {
@@ -98,7 +134,7 @@
         }
 
 
-
+        <button @onclick="resetLobby">Play Again</button>
 
 
     }
@@ -117,16 +153,15 @@ else
 }
 
 @code {
+    private string localIPv4 = "Retrieving IP Address...";
     private string currentScreen = "hostScreen";
     private HubConnection hubConnection;
-    private List<string> messages = new List<string>();
-    private string username;
-    private string userCountry;
     private bool joinedLobby = false;
     private List<string> players;
-    private string formattedQuestion;
-    private string formattedAnswer;
-    private string pageTitle;
+    private string? formattedQuestion;
+    private string? formattedAnswer;
+    private string? answer;
+    private string? pageTitle;
     private bool endOnScore;
     private bool gameFinished = false;
     private int questionsPerPage = 10;
@@ -134,7 +169,7 @@ else
     private int totalQuestions = 20;
     private int currentQuestionNumber = 0;
     private int currentQuestionFromPage = 0;
-    private List<KeyValuePair<string, int>> playerScores;
+    private List<KeyValuePair<string, int>>? playerScores;
     private bool recievedScores = false;
 
 
@@ -149,6 +184,8 @@ else
 
         hubConnection.On<string>("LobbyJoined", username =>
         {
+
+
             if (username.Equals("Could not resolve playerDataServices"))
                 currentScreen = "Error";
 
@@ -162,16 +199,25 @@ else
             InvokeAsync(StateHasChanged);
         });
 
-        hubConnection.On<string, string, string>("RecieveQuestionHost", (formattedQuestion, formattedAnswer, answer) =>
+        hubConnection.On<string, string, string, int>("RecieveQuestionHost", (formattedQuestion, formattedAnswer, answer, sentenceIndex) =>
         {
             recievedScores = false;
             this.formattedQuestion = formattedQuestion;
             this.formattedAnswer = formattedAnswer;
-
+            this.answer = answer;
 
             currentScreen = "questionScreen";
             InvokeAsync(StateHasChanged);
+
+            hubConnection.SendAsync("SendQuestionContext", pageTitle, sentenceIndex);
         });
+
+        hubConnection.On<string, string>("RecieveQuestionContext", (preceedingSentence, proceedingSentence) =>
+        {
+            this.formattedAnswer = preceedingSentence + getBoldedAnswer(formattedQuestion, answer) + proceedingSentence;
+
+        });
+
         hubConnection.On<List<KeyValuePair<string, int>>>("RecieveScores", (playerScores) =>
         {
             //sorts scores so that the first displayed is the highest player's score
@@ -182,9 +228,21 @@ else
             currentQuestionNumber++;
             InvokeAsync(StateHasChanged);
 
+        });
+
+        hubConnection.On("ResetLobby", () =>
+        {
+
 
 
         });
+
+
+        //handles the event that the host is disconnection from the server
+        hubConnection.Closed += async (error) =>
+        {
+
+        };
 
 
 
@@ -198,17 +256,26 @@ else
 
     public bool IsConnected => hubConnection.State == HubConnectionState.Connected;
 
+    /// <summary>
+    /// Changes current screen to display options for game setup.
+    /// </summary>
     private async void OpenOptions()
     {
         currentScreen = "optionsScreen";
         InvokeAsync(StateHasChanged);
-
     }
+
+    /// <summary>
+    /// Changes current screen to display current lobby and available players
+    /// </summary>
     private async void ShowLobby()
     {
         currentScreen = "hostScreen";    
     }
 
+    /// <summary>
+    /// Sends a message to the server to signal the start of the game and allow clients to begin game-start protocol.
+    /// </summary>
     private async void StartGame()
     {
 
@@ -219,6 +286,10 @@ else
 
     }
 
+    /// <summary>
+    /// Requests question from the server. If the current question number being requested is greater than the number
+    /// of questions set per page, a new wikipedia page will be requested first before requesting another question.
+    /// </summary>
     private async void SendQuestion()
     {
         if (currentQuestionFromPage < 10)
@@ -282,4 +353,21 @@ else
         return false;    
     }
 
+    private string getBoldedAnswer(string formattedQuestion, string answer)
+    {
+        return formattedQuestion.Replace("________", $"<b>{answer}</b>");
+    }
+
+
+    public async void resetLobby()
+    {
+        await hubConnection.SendAsync("ResetLobby");
+
+    
+    }
+
+
+
+
+    
 }

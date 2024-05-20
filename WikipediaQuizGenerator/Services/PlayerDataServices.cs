@@ -58,19 +58,19 @@ namespace WikipediaQuizGenerator.Services
             return currentPageTitle;
         }
 
-        public void generateQuestion(string pageName, out string formattedQuestion, out string formattedAnswer, out string[] questionOptions, out string answer) 
+        public void generateQuestion(string pageName, out string formattedQuestion, out string formattedAnswer, out string[] questionOptions, out string answer, out int sentenceIndex) 
         {
             WikiPage wikiPage = allWikiPages[pageName];
             Random random = new Random();
 
             //grab sentence to use as question
             bool validSentence = false;
-            int pageIndex = random.Next(wikiPage.sentencePairs.Count);
+            sentenceIndex = random.Next(wikiPage.sentencePairs.Count);
             //this is assigned to help the compiler, but will be overwritten in the loop so we can pick a random sentence
             Tuple<string, List<string>> sentencePair = wikiPage.sentencePairs[0];
             while (!validSentence) 
             {
-                sentencePair = wikiPage.sentencePairs[pageIndex];
+                sentencePair = wikiPage.sentencePairs[sentenceIndex];
                 //only keep the sentence if there are at least two keywords in the sentence. This
                 //prevents the algorithm from picking "sentences" that are just keywords or getting
                 //sentences too short or incomplete to really use
@@ -79,7 +79,7 @@ namespace WikipediaQuizGenerator.Services
                     validSentence = true;
                 }
                 else
-                    pageIndex = random.Next(wikiPage.sentencePairs.Count);
+                    sentenceIndex = random.Next(wikiPage.sentencePairs.Count);
             }
 
             
