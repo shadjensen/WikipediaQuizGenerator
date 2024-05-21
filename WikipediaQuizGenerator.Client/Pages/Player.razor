@@ -39,10 +39,13 @@
 
         if (!keywordIsSelected)
         {
-            foreach(string keyword in keywords)
-            {
-                <button @onclick="( () => selectKeyword(keyword) )">@capitalizeFirstCharacter(keyword)</button>
-            }
+            <div class="keyword-button-container">
+                
+                @foreach(string keyword in keywords)
+                {
+                    <button @onclick="( () => selectKeyword(keyword) )">@capitalizeFirstCharacter(keyword)</button>
+                }
+            </div>
         }
         else
         {
