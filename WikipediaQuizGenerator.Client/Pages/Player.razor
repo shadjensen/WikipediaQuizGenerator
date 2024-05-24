@@ -5,55 +5,60 @@
 @rendermode InteractiveWebAssembly
 
 <h3>@username</h3>
+<div class="background-gradient"></div>
 
 @if (IsConnected)
 {
 
-    if (currentScreen.Equals("joinScreen") || joinedLobby == false)
+    @if (currentScreen.Equals("joinScreen") || joinedLobby == false)
     {
+        <div class="join-screen">
+            <input type="text" @bind="username" />
+            <input type="text" @bind="userCountry" />
+            <button @onclick="JoinLobby">Send</button>
 
-        <input type="text" @bind="username" />
-        <input type="text" @bind="userCountry" />
-        <button @onclick="JoinLobby">Send</button>
+            @if (!foundHost)
+            {
+                <p>Could not join lobby as there was no found host</p>    
+            
+            }
 
-        if (!foundHost)
-        {
-            <p>Could not join lobby as there was no found host</p>    
-        
-        }
-
-    
+        </div>
     }
     else if (currentScreen.Equals("waitScreen"))
     {
-        <p>waiting for game to begin</p>
+            <p>waiting for game to begin</p>
 
-        <!-- https://giphy.com/stickers/molangofficialpage-kawaii-molang-piupiu-OFvzv065oT5HP5lquy -->
+            <!-- https://giphy.com/stickers/molangofficialpage-kawaii-molang-piupiu-OFvzv065oT5HP5lquy -->
+
+        
     }
     else if (currentScreen.Equals("playScreen"))
     {
-        <div class="play-top-bar">
-            <p>@username</p>
-            <p>Score: @playerScore</p>
-        </div>
-
-        if (!keywordIsSelected)
-        {
-            <div class="keyword-button-container">
-                
-                @foreach(string keyword in keywords)
-                {
-                    <button @onclick="( () => selectKeyword(keyword) )">@capitalizeFirstCharacter(keyword)</button>
-                }
+        
+        <div class="playScreen">
+            <div class="play-top-bar">
+                <p>@username</p>
+                <p>Score: @playerScore</p>
             </div>
-        }
-        else
-        {
-            <p> Waiting for other responses...</p>
-        
-        
-        }
 
+            @if (!keywordIsSelected)
+            {
+                <div class="keyword-button-container">
+                    
+                    @foreach(string keyword in keywords)
+                    {
+                        <button @onclick="( () => selectKeyword(keyword) )">@capitalizeFirstCharacter(keyword)</button>
+                    }
+                </div>
+            }
+            else
+            {
+                <p> Waiting for other responses...</p>
+            
+            
+            }
+        </div>
     }
     else if (currentScreen.Equals("scoreScreen"))
     {
@@ -62,9 +67,9 @@
             <p>Score: @playerScore</p>
         </div>
 
-        if (answerSubmitted)
+        @if (answerSubmitted)
         {
-            if(answerCorrect)
+            @if(answerCorrect)
             {
                 <h3>@correctMessages[random.Next(correctMessages.Length)]</h3>
 
