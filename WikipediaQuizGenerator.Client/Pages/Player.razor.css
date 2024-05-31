@@ -21,14 +21,18 @@
 }
 
 .join-screen {
+    display:flex;
+    flex-direction: column;
     align-items:center;
     justify-content:center;
+    height:100vh;
+    padding:20px;
 }
 
-    .join-screen input {
-        justify-content: center;
+.join-screen input {
+     justify-content: center;
 
-    }
+}
 
 .play-top-bar {
     display: flex;
@@ -59,7 +63,7 @@
         border-width: 0px;
         background: rgba(128, 128, 128, 0.5);
         position: relative;
-        z-index: 1;
+        z-index: 2;
     }
 
 

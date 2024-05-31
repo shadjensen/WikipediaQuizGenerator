@@ -7,11 +7,23 @@ h3 {
     color: red;
 }
 
+.background-gradient {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    background: linear-gradient(45deg, #ffb908, #ff96da);
+    background-size: 300%;
+    animation: slide 10s linear infinite alternate;
+    z-index: -1;
+}
 .nav-buttons-container {
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items:center;
+    z-index:1;
 }
 
 button {
@@ -21,17 +33,7 @@ button {
 }
 
 
-.background-gradient {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100vh;
-    background: linear-gradient(45deg, #ffb908, #ff96da);
-    background-size: 300%;
-    z-index: -1;
-    animation: slide 10s linear infinite alternate;
-}
+
 
 @keyframes slide {
     0% {

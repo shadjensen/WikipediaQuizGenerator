@@ -13,7 +13,9 @@
     @if (currentScreen.Equals("joinScreen") || joinedLobby == false)
     {
         <div class="join-screen">
+            <p>Username</p>
             <input type="text" @bind="username" />
+            <p>Country</p>
             <input type="text" @bind="userCountry" />
             <button @onclick="JoinLobby">Send</button>
 
@@ -27,10 +29,11 @@
     }
     else if (currentScreen.Equals("waitScreen"))
     {
+        <div class="join-screen">
             <p>waiting for game to begin</p>
 
             <!-- https://giphy.com/stickers/molangofficialpage-kawaii-molang-piupiu-OFvzv065oT5HP5lquy -->
-
+        </div>
         
     }
     else if (currentScreen.Equals("playScreen"))
@@ -62,42 +65,45 @@
     }
     else if (currentScreen.Equals("scoreScreen"))
     {
-        <div class="play-top-bar">
-            <p>@username</p>
-            <p>Score: @playerScore</p>
-        </div>
+        <div class="score-screen">
+            <div class="play-top-bar">
+                <p>@username</p>
+                <p>Score: @playerScore</p>
+            </div>
 
-        @if (answerSubmitted)
-        {
-            @if(answerCorrect)
+            @if (answerSubmitted)
             {
-                <h3>@correctMessages[random.Next(correctMessages.Length)]</h3>
+                @if(answerCorrect)
+                {
+                    <h3>@correctMessages[random.Next(correctMessages.Length)]</h3>
 
-                <!-- https://giphy.com/stickers/molangofficialpage-kawaii-molang-piupiu-WVqnJcExQS8QzcCrup -->
+                    <!-- https://giphy.com/stickers/molangofficialpage-kawaii-molang-piupiu-WVqnJcExQS8QzcCrup -->
+                }
+                else
+                {
+                    <h3>@incorrectMessages[random.Next(incorrectMessages.Length)]</h3>
+
+                    <!-- https://giphy.com/stickers/molangofficialpage-kawaii-molang-piupiu-JbgeKJ1k25J41VeupQ -->
+                }
             }
             else
             {
-                <h3>@incorrectMessages[random.Next(incorrectMessages.Length)]</h3>
+                <h3>@noAnswerMessages[random.Next(noAnswerMessages.Length)]</h3>
 
                 <!-- https://giphy.com/stickers/molangofficialpage-kawaii-molang-piupiu-JbgeKJ1k25J41VeupQ -->
+            
             }
-        }
-        else
-        {
-            <h3>@noAnswerMessages[random.Next(noAnswerMessages.Length)]</h3>
-
-            <!-- https://giphy.com/stickers/molangofficialpage-kawaii-molang-piupiu-JbgeKJ1k25J41VeupQ -->
-        
-        }
-        <p>Current score = @playerScore</p>
+            <p>Current score = @playerScore</p>
+        </div>
 
     }
     else if (currentScreen.Equals("finalScoreScreen"))
     {
-        
-        <p>Congratulations you placed @generatePlacing(playerPlacing)</p>
+        <div class="final-score-screen">
+            <p>Congratulations you placed @generatePlacing(playerPlacing)</p>
 
-        <buton @onclick="resetToStart">Play Again?</buton>
+            <buton @onclick="resetToStart">Play Again?</buton>
+        </div>
     }
     else
     {

@@ -22,128 +22,142 @@
 {
     if (currentScreen.Equals("hostScreen"))
     {
-        <!-- https://media.istockphoto.com/id/1165287336/vector/world-map-dot-illustration-on-blue-background.jpg?s=612x612&w=0&k=20&c=x7Erj7DgRzsvKlSRwZgueDPRNJshUf3wTvOSwifxfMY= -->
+        <div class="screen host-screen">
+            <!-- https://media.istockphoto.com/id/1165287336/vector/world-map-dot-illustration-on-blue-background.jpg?s=612x612&w=0&k=20&c=x7Erj7DgRzsvKlSRwZgueDPRNJshUf3wTvOSwifxfMY= -->
 
 
-        <h3></h3>
-        if (pageTitle != null)
-        {
-            <button @onclick="StartGame">Start Game</button>
-            <button @onclick="OpenOptions">Options</button>
-        }
-        foreach(string player in players)
-        {
-            <ul>@player</ul>
-        }
+            <div class="start-button-container">
+                @if (pageTitle != null)
+                {
+                    <button @onclick="StartGame">Start Game</button>
+                    <button @onclick="OpenOptions">Options</button>
+                }
+            </div>
+
+            @foreach(string player in players)
+            {
+                <ul>@player</ul>
+            }
+
+        </div>
     }
     else if (currentScreen.Equals("optionsScreen"))
     {
-        <p>Lobby Name: </p>
-        <input type="text" @bind=localIPv4 />
+        <div class="screen options-screen">
+            <p>Lobby Name: </p>
+            <input type="text" @bind=localIPv4 />
 
-        <div>
-            <p>End On Score: </p>
-            <input type="checkbox" @bind="endOnScore" />
-        </div>
-        if (endOnScore)
-        {
             <div>
-                <p>Score To Win:</p>
-                <input type="number" @bind="scoreToWin" />
+                <p>End On Score: </p>
+                <input type="checkbox" @bind="endOnScore" />
             </div>
-        }
-        else
-        {
+            if (endOnScore)
+            {
+                <div>
+                    <p>Score To Win:</p>
+                    <input type="number" @bind="scoreToWin" />
+                </div>
+            }
+            else
+            {
+                <div>
+                    <p>Number of Questions:</p>
+                    <input type="number" @bind="totalQuestions" />
+                </div>
+            }
             <div>
-                <p>Number of Questions:</p>
-                <input type="number" @bind="totalQuestions" />
+                <p>Questions Per Page:</p>
+                <input type="number" @bind="questionsPerPage" />
             </div>
-        }
-        <div>
-            <p>Questions Per Page:</p>
-            <input type="number" @bind="questionsPerPage" />
+
+            
+
+            <button @onclick="ShowLobby">Return to Lobby</button>
         </div>
-
-        
-
-        <button @onclick="ShowLobby">Return to Lobby</button>
     }
     else if (currentScreen.Equals("questionScreen"))
     {
-        <div class="host-top-bar">
-            <p>Current Page: @pageTitle</p>
-            <p>Question #: @currentQuestionNumber</p>
-        </div>
+        <div class="screen question-screen">
+            <div class="header host-top-bar">
+                <p>Current Page: @pageTitle</p>
+                <p>Question #: @currentQuestionNumber</p>
+            </div>
 
-        <p>@formattedQuestion</p>
+            <p>@formattedQuestion</p>
 
-        <button @onclick="ShowAnswer">Show Answer</button>
-        <div class="question-footer">
-            <p>Submitted Questions</p>    
-            <div class="timer">
-                <p>Time</p>
-                <p>30</p>
+            <button @onclick="ShowAnswer">Show Answer</button>
+            <div class="footer question-footer">
+                <p>Submitted Questions</p>    
+                <div class="timer">
+                    <p>Time</p>
+                    <p>30</p>
+                </div>
             </div>
         </div>
     }
     else if (currentScreen.Equals("answerScreen"))
     {
-        <div class="host-top-bar">
-            <p>Current Page: @pageTitle</p>
-            <p>Question #: @currentQuestionNumber</p>
-        </div>
+        <div class="screen answer-screen">
+            <div class="header host-top-bar">
+                <p>Current Page: @pageTitle</p>
+                <p>Question #: @currentQuestionNumber</p>
+            </div>
 
-        <p>Correct Answer:</p>
-        <div class="correct-answer-expanded">
-            <p>@((MarkupString)formattedAnswer)</p>
-        </div>
+            <p>Correct Answer:</p>
+            <div class="correct-answer-expanded">
+                <p>@((MarkupString)formattedAnswer)</p>
+            </div>
+        
 
 
 
-        if (recievedScores)
+        @if (recievedScores)
         {
             <button @onclick="ShowScores">Show Scores</button>
         }
+        </div>
     }
     else if (currentScreen.Equals("scoreScreen"))
     {
-        <div class="host-top-bar">
-            <p>Current Page: @pageTitle</p>
-            <p>Question #: @currentQuestionNumber</p>
+        <div class="screen score-screen">
+            <div class="header host-top-bar">
+                <p>Current Page: @pageTitle</p>
+                <p>Question #: @currentQuestionNumber</p>
+            </div>
+
+            <h3>Scores</h3>
+            @foreach (KeyValuePair<string, int> scorePair in playerScores)
+            {
+                <ul>@scorePair.Key : @scorePair.Value</ul>
+
+            }
+
+            <!-- If the game should be over, do not load another question, but instead prompt the final score -->
+            @if (!WinConditionMet())
+            {
+                <button @onclick="SendQuestion">Next Question</button>
+            }
+            else
+            {
+                <button @onclick="ShowFinalScore">View Final Score</button>
+
+            }
         </div>
-
-        <h3>Scores</h3>
-        foreach (KeyValuePair<string, int> scorePair in playerScores)
-        {
-            <ul>@scorePair.Key : @scorePair.Value</ul>
-
-        }
-
-        <!-- If the game should be over, do not load another question, but instead prompt the final score -->
-        if (!WinConditionMet())
-        {
-            <button @onclick="SendQuestion"> Next Question</button>
-        }
-        else
-        {
-            <button @onclick="ShowFinalScore"> View Final Score</button>
-
-
-        }
     }
     else if (currentScreen.Equals("finalScoreScreen"))
     {
-        <h3>Final score</h3>
-        foreach (KeyValuePair<string, int> pair in playerScores)
-        {
-            <ol>@pair.Key : @pair.Value</ol>         
+        <div class="join-screen final-score-screen">
+            <h3>Final score</h3>
+            @foreach (KeyValuePair<string, int> pair in playerScores)
+            {
+                <ol>@pair.Key : @pair.Value</ol>         
 
-        }
-
-
-        <button @onclick="resetLobby">Play Again</button>
+            }
 
 
+            <button @onclick="resetLobby">Play Again</button>
+
+        </div>
     }
     else
     {

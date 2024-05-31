@@ -11,7 +11,7 @@ namespace Wikipedia
         public List<string> allKeywords;
         public string html;
         public string pageTitle;
-        /// <summary>
+        /// <summary> 
         /// Creates a new Wiki page object from a string url. This url should be in the format https://en.wikipedia.org/wiki/ + the title of the page.
         /// </summary>
         /// <param name="url"></param>
