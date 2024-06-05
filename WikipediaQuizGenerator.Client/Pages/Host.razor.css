@@ -6,26 +6,63 @@ b, strong {
 }
 
 .header {
+
     display:flex;
-    flex-direction:row;
-    align-content:space-between;
+    justify-content:space-between;
+    align-items:center;
+    width:100%;
+    z-index:900;
 }
 
 .screen {
     display:flex;
     flex-direction:column;
     align-items:center;
-    justify-content:center;
-    height:100vh;
+    justify-content:space-between;
+    height:90vh;
+    padding:20px;
 }
 
 .footer {
+
     display: flex;
-    flex-direction: row;
-    align-content: space-between;
+    justify-content:space-between;
+    align-items:center;
+    width:100%;
+    z-index:900;
 }
+
+
+.player-list-display {
+    height:40vh;
+    border-block-color:black;
+}
+
+.score-screen button, .final-score-screen button, .answer-screen button {
+    
+}
+
+.question-box {
+    display:flex;
+    justify-content:center;
+    width:80%
+}
+
+.correct-answer-expanded {
+    display:inline-block;
+    overflow:hidden;
+    width:80%;
+    
+}
+
+.score-display {
+
+    height:60vh;
+}
+
 
 button {
     z-index:1;
 }
+
 

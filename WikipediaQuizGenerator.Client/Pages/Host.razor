@@ -16,17 +16,25 @@
 </script>
 
 
-<h3>@localIPv4</h3>
+
 
 @if (IsConnected)
 {
+    <div class="background-gradient"></div>
     if (currentScreen.Equals("hostScreen"))
     {
         <div class="screen host-screen">
             <!-- https://media.istockphoto.com/id/1165287336/vector/world-map-dot-illustration-on-blue-background.jpg?s=612x612&w=0&k=20&c=x7Erj7DgRzsvKlSRwZgueDPRNJshUf3wTvOSwifxfMY= -->
-
+            <h3>@localIPv4</h3>
+            <div class="player-list-display">
+            @foreach (string player in players)
+            {
+                <ul>@player</ul>
+            }
+            </div>
 
             <div class="start-button-container">
+                
                 @if (pageTitle != null)
                 {
                     <button @onclick="StartGame">Start Game</button>
@@ -34,10 +42,7 @@
                 }
             </div>
 
-            @foreach(string player in players)
-            {
-                <ul>@player</ul>
-            }
+
 
         </div>
     }
@@ -82,12 +87,15 @@
                 <p>Current Page: @pageTitle</p>
                 <p>Question #: @currentQuestionNumber</p>
             </div>
-
-            <p>@formattedQuestion</p>
-
+            <div class="question-box">
+                <p>@formattedQuestion</p>
+            </div>
             <button @onclick="ShowAnswer">Show Answer</button>
             <div class="footer question-footer">
-                <p>Submitted Questions</p>    
+                <div class="submitted-answer-counter">
+                    <p>Submitted Questions</p>
+                    <p>0</p>
+                </div>
                 <div class="timer">
                     <p>Time</p>
                     <p>30</p>
@@ -103,11 +111,10 @@
                 <p>Question #: @currentQuestionNumber</p>
             </div>
 
-            <p>Correct Answer:</p>
             <div class="correct-answer-expanded">
                 <p>@((MarkupString)formattedAnswer)</p>
             </div>
-        
+
 
 
 
@@ -116,6 +123,8 @@
             <button @onclick="ShowScores">Show Scores</button>
         }
         </div>
+
+
     }
     else if (currentScreen.Equals("scoreScreen"))
     {
@@ -125,12 +134,14 @@
                 <p>Question #: @currentQuestionNumber</p>
             </div>
 
-            <h3>Scores</h3>
-            @foreach (KeyValuePair<string, int> scorePair in playerScores)
-            {
-                <ul>@scorePair.Key : @scorePair.Value</ul>
+            <div class="score-display">
+                <h3>Scores</h3>
+                @foreach (KeyValuePair<string, int> scorePair in playerScores)
+                {
+                    <ul>@scorePair.Key : @scorePair.Value</ul>
 
-            }
+                }
+            </div>
 
             <!-- If the game should be over, do not load another question, but instead prompt the final score -->
             @if (!WinConditionMet())
