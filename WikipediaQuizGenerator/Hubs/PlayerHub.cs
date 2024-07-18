@@ -156,7 +156,26 @@ namespace WikipediaQuizGenerator.Hubs
                     await Clients.Caller.SendAsync("RecieveClientScore", false, playerDataServices.PlayerScores[username]);
                 }
 
+                await playerDataServices.ServerHost.SendAsync("UpdateClientAnswerCount");
 
+
+            }
+
+        }
+
+        public async void GenerateQRCode(string httpAddress) 
+        {
+            QRCodeService? qrcodeservice = serviceProvider.GetService<QRCodeService>();
+            PlayerDataServices? playerDataServices = serviceProvider.GetService<PlayerDataServices>();
+            if (qrcodeservice != null) 
+            {
+                string qrID = qrcodeservice.GenerateQrCode(httpAddress);
+                
+                if (playerDataServices != null) 
+                {
+                    await playerDataServices.ServerHost.SendAsync("RecieveQRCode", qrID);
+                }
+                
             }
 
         }

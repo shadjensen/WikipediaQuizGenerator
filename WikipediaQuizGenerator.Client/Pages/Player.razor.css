@@ -3,7 +3,7 @@
     color: white;
     text-align: center;
     height: 100vh;
-    background: linear-gradient(45deg, #ffb908, #ff96da);
+    background: linear-gradient(45deg, #f8f9fa, #0645ad );
     animation: slide 1s linear infinite alternating;
     background-size: 400%;
 }
@@ -14,7 +14,7 @@
     left: 0;
     width: 100%;
     height: 100vh;
-    background: linear-gradient(45deg, #ffb908, #ff96da);
+    background: linear-gradient(45deg, #f8f9fa, #0645ad);
     background-size: 300%;
     z-index: -1;
     animation: slide 10s linear infinite alternate;
@@ -55,8 +55,11 @@
 
     .keyword-button-container button {
         flex: 1 0 45%; /* Make each button take up about half of the container width */
+        font-size:20px;
         color: white;
         min-width: 100px;
+       
+        min-height: 1vh;
         padding: 3%; /* Adjust padding as   needed */
         box-sizing: border-box; /* Ensure padding is included in the element's total width and height */
         border-radius: 10px;

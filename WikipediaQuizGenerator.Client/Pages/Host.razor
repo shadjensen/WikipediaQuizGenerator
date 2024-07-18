@@ -3,6 +3,8 @@
 @using System.Net
 @using System.Net.NetworkInformation
 @using System.Net.Sockets
+@using System.Drawing;
+@using System.IO;
 @inject NavigationManager NavigationManager
 
 @rendermode InteractiveWebAssembly
@@ -25,8 +27,10 @@
     {
         <div class="screen host-screen">
             <!-- https://media.istockphoto.com/id/1165287336/vector/world-map-dot-illustration-on-blue-background.jpg?s=612x612&w=0&k=20&c=x7Erj7DgRzsvKlSRwZgueDPRNJshUf3wTvOSwifxfMY= -->
-            <h3>@localIPv4</h3>
+            <img src=@qrCodePath alt="QR Code Join Link"/>
             <div class="player-list-display">
+
+                C:\Users\jense\source\repos\PersonalProjects\WikipediaQuizGenerator
             @foreach (string player in players)
             {
                 <ul>@player</ul>
@@ -50,13 +54,16 @@
     {
         <div class="screen options-screen">
             <p>Lobby Name: </p>
-            <input type="text" @bind=localIPv4 />
+            <div>
+                <input type="text" @bind=httpAddress />
+                <button @onclick="GenerateNewQRCode">Generate QR Code</button>
+            </div>
 
             <div>
                 <p>End On Score: </p>
                 <input type="checkbox" @bind="endOnScore" />
             </div>
-            if (endOnScore)
+            @if (endOnScore)
             {
                 <div>
                     <p>Score To Win:</p>
@@ -94,7 +101,7 @@
             <div class="footer question-footer">
                 <div class="submitted-answer-counter">
                     <p>Submitted Questions</p>
-                    <p>0</p>
+                    <p>@submittedAnswers</p>
                 </div>
                 <div class="timer">
                     <p>Time</p>
@@ -185,7 +192,8 @@ else
 }
 
 @code {
-    private string localIPv4 = "Retrieving IP Address...";
+    private string httpAddress = "http://";
+    private string qrCodePath = "images\\qrcode.png";
     private string currentScreen = "hostScreen";
     private HubConnection hubConnection;
     private bool joinedLobby = false;
@@ -201,6 +209,7 @@ else
     private int totalQuestions = 20;
     private int currentQuestionNumber = 0;
     private int currentQuestionFromPage = 0;
+    private int submittedAnswers = 0;
     private List<KeyValuePair<string, int>>? playerScores;
     private bool recievedScores = false;
 
@@ -211,6 +220,9 @@ else
         hubConnection = new HubConnectionBuilder()
         .WithUrl(NavigationManager.ToAbsoluteUri("/playerhub"))
         .Build();
+
+
+
 
 
 
@@ -238,6 +250,9 @@ else
             this.formattedAnswer = formattedAnswer;
             this.answer = answer;
 
+            currentQuestionNumber++;
+
+            submittedAnswers = 0;
             currentScreen = "questionScreen";
             InvokeAsync(StateHasChanged);
 
@@ -246,7 +261,8 @@ else
 
         hubConnection.On<string, string>("RecieveQuestionContext", (preceedingSentence, proceedingSentence) =>
         {
-            this.formattedAnswer = preceedingSentence + getBoldedAnswer(formattedQuestion, answer) + proceedingSentence;
+            string style = "text-decoration: underline;";
+            this.formattedAnswer = preceedingSentence + formattedQuestion.Replace("________", $"<b style=\"{style}\">{answer}</b>") + proceedingSentence;
 
         });
 
@@ -257,16 +273,30 @@ else
 
 
             recievedScores = true;
-            currentQuestionNumber++;
             InvokeAsync(StateHasChanged);
 
         });
+
+        hubConnection.On("UpdateClientAnswerCount", () =>
+        {
+            submittedAnswers++;        
+            InvokeAsync(StateHasChanged);
+
+        }        
+        );
 
         hubConnection.On("ResetLobby", () =>
         {
 
 
 
+        });
+
+        hubConnection.On<string>("RecieveQRCode", (qrID) =>
+        {
+            qrCodePath = qrID;
+            InvokeAsync(StateHasChanged);
+        
         });
 
 
@@ -324,7 +354,7 @@ else
     /// </summary>
     private async void SendQuestion()
     {
-        if (currentQuestionFromPage < 10)
+        if (currentQuestionFromPage < questionsPerPage)
         {
             await hubConnection.SendAsync("SendQuestion", pageTitle);
 
@@ -387,6 +417,8 @@ else
 
     private string getBoldedAnswer(string formattedQuestion, string answer)
     {
+        //&quot; is the escape character that allows us to write " within strings.
+        //This lets us set the ID of our correct answer so that we can more easily apply CSS to this text
         return formattedQuestion.Replace("________", $"<b>{answer}</b>");
     }
 
@@ -395,11 +427,14 @@ else
     {
         await hubConnection.SendAsync("ResetLobby");
 
-    
+
     }
 
+    private async void GenerateNewQRCode()
+    {
+        await hubConnection.SendAsync("GenerateQRCode", httpAddress);
 
-
+    }
 
     
 }

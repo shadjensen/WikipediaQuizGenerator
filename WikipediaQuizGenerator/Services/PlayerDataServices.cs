@@ -14,6 +14,7 @@ namespace WikipediaQuizGenerator.Services
         public Dictionary<string, string> PlayerCountries { get; set; } = new Dictionary<string, string>();
         public Dictionary<string, int> PlayerScores { get; set; } = new Dictionary<string, int>();
         public Dictionary<string, WikiPage> allWikiPages { get; set; } = new Dictionary<string, WikiPage>();
+        private Dictionary<WikiPage, List<int>> usedSentences { get; set; } = new Dictionary<WikiPage, List<int>>();
         public ISingleClientProxy ServerHost { get; set; }
         public string currentPageTitle { get; set; }
         public string currentQuestionAnswer { get; set; }
@@ -55,6 +56,8 @@ namespace WikipediaQuizGenerator.Services
             Random random = new Random();
             List<KeyValuePair<string, WikiPage>> pagesAsList = allWikiPages.ToList();
             currentPageTitle = pagesAsList[random.Next(pagesAsList.Count)].Key;
+            
+
             return currentPageTitle;
         }
 
@@ -63,23 +66,36 @@ namespace WikipediaQuizGenerator.Services
             WikiPage wikiPage = allWikiPages[pageName];
             Random random = new Random();
 
+            if (!usedSentences.ContainsKey(wikiPage))
+                usedSentences.Add(wikiPage, new List<int>());
+
             //grab sentence to use as question
             bool validSentence = false;
             sentenceIndex = random.Next(wikiPage.sentencePairs.Count);
             //this is assigned to help the compiler, but will be overwritten in the loop so we can pick a random sentence
             Tuple<string, List<string>> sentencePair = wikiPage.sentencePairs[0];
+            int attemptCounter = 0;
             while (!validSentence) 
             {
                 sentencePair = wikiPage.sentencePairs[sentenceIndex];
                 //only keep the sentence if there are at least two keywords in the sentence. This
                 //prevents the algorithm from picking "sentences" that are just keywords or getting
                 //sentences too short or incomplete to really use
-                if (sentencePair.Item2.Count >= 2)
+                if (sentencePair.Item2.Count >= 1 && !usedSentences[wikiPage].Contains(sentenceIndex))
                 {
                     validSentence = true;
+                    usedSentences[wikiPage].Add(sentenceIndex);
                 }
                 else
+                {
                     sentenceIndex = random.Next(wikiPage.sentencePairs.Count);
+                    //there is a concern that a page might not contain enough usable sentences to ensure no duplicates
+                    //so to prevent an infinite loop in the case that all eligible sentences have already been used, if
+                    // a certain number of attempts are made, reset the used list so all sentences are now in the pool
+                    if (usedSentences[wikiPage].Contains(sentenceIndex))
+                        attemptCounter++;
+                }
+
             }
 
             
