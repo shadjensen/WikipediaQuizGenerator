@@ -21,6 +21,8 @@ namespace WikipediaQuizGenerator.Services
         private int numberOfQuestionOptions { get; set; } = 8;
         public bool recievingScores { get; set; } = false;
 
+        public List<string> playerAnswerOrder = new();
+
 
         public PlayerDataServices()
         {
@@ -63,6 +65,7 @@ namespace WikipediaQuizGenerator.Services
 
         public void generateQuestion(string pageName, out string formattedQuestion, out string formattedAnswer, out string[] questionOptions, out string answer, out int sentenceIndex) 
         {
+            playerAnswerOrder.Clear();
             WikiPage wikiPage = allWikiPages[pageName];
             Random random = new Random();
 

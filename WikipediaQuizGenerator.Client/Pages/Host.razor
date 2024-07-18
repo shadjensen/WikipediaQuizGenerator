@@ -30,7 +30,6 @@
             <img src=@qrCodePath alt="QR Code Join Link"/>
             <div class="player-list-display">
 
-                C:\Users\jense\source\repos\PersonalProjects\WikipediaQuizGenerator
             @foreach (string player in players)
             {
                 <ul>@player</ul>
@@ -60,6 +59,12 @@
             </div>
 
             <div>
+                <p>Wikipedia Articles</p>
+                <input type="text" tabindex="wikipediaUrlLinks">
+
+            </div>
+
+            <div>
                 <p>End On Score: </p>
                 <input type="checkbox" @bind="endOnScore" />
             </div>
@@ -80,6 +85,11 @@
             <div>
                 <p>Questions Per Page:</p>
                 <input type="number" @bind="questionsPerPage" />
+            </div>
+
+            <div>
+                <p>Auto Proceed After All Players Answer</p>
+                <input type="number" @bind="autoCountdownTime" />
             </div>
 
             
@@ -103,10 +113,7 @@
                     <p>Submitted Questions</p>
                     <p>@submittedAnswers</p>
                 </div>
-                <div class="timer">
-                    <p>Time</p>
-                    <p>30</p>
-                </div>
+
             </div>
         </div>
     }
@@ -210,8 +217,11 @@ else
     private int currentQuestionNumber = 0;
     private int currentQuestionFromPage = 0;
     private int submittedAnswers = 0;
+    private int numOfPlayers = 0;
+    private int autoCountdownTime = 3;
     private List<KeyValuePair<string, int>>? playerScores;
     private bool recievedScores = false;
+    private string wikipediaUrlLinks;
 
 
     protected override async Task OnInitializedAsync()
@@ -234,6 +244,7 @@ else
                 currentScreen = "Error";
 
             players.Add(username);
+            numOfPlayers++;
             InvokeAsync(StateHasChanged);
         });
 
@@ -279,7 +290,9 @@ else
 
         hubConnection.On("UpdateClientAnswerCount", () =>
         {
-            submittedAnswers++;        
+            submittedAnswers++;
+            if (submittedAnswers >= numOfPlayers)
+                beginCountdownToNextQuestion();
             InvokeAsync(StateHasChanged);
 
         }        
@@ -296,7 +309,7 @@ else
         {
             qrCodePath = qrID;
             InvokeAsync(StateHasChanged);
-        
+
         });
 
 
@@ -434,6 +447,11 @@ else
     {
         await hubConnection.SendAsync("GenerateQRCode", httpAddress);
 
+    }
+
+    private void beginCountdownToNextQuestion()
+    {
+        
     }
 
     

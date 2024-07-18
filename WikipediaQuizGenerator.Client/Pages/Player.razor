@@ -15,8 +15,6 @@
         <div class="join-screen">
             <p>Username</p>
             <input type="text" @bind="username" />
-            <p>Country</p>
-            <input type="text" @bind="userCountry" />
             <button @onclick="JoinLobby">Send</button>
 
             @if (!foundHost)
@@ -123,7 +121,6 @@ else
     private string currentScreen = "joinScreen";
     private HubConnection hubConnection;
     private string username;
-    private string userCountry;
     private bool joinedLobby = false;
     private bool foundHost = true;
     private bool answerCorrect = false;
@@ -242,13 +239,13 @@ else
 
     }
 
-    Task Send() => hubConnection.SendAsync("JoinLobby", username, userCountry);
+    Task Send() => hubConnection.SendAsync("JoinLobby", username);
 
     public bool IsConnected => hubConnection.State == HubConnectionState.Connected;
 
     private void JoinLobby()
     {
-        hubConnection.SendAsync("JoinLobby", username, userCountry);
+        hubConnection.SendAsync("JoinLobby", username);
     }
 
     private void selectKeyword(string selectedWord)

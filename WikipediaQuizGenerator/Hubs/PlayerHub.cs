@@ -15,6 +15,11 @@ namespace WikipediaQuizGenerator.Hubs
             serviceProvider = _serviceProvider;
         }
 
+        /// <summary>
+        /// This method is called when a host is selected. It saves one connection as the host through which most controlling calls will be sent.
+        /// If this method is called when a host is already delcared, it will override the first declaration allowing two clients to act as host but only one
+        /// will recieve back the host calls
+        /// </summary>
         public void DeclareHost()
         {
             PlayerDataServices? playerDataServices = serviceProvider.GetService<PlayerDataServices>();
@@ -37,7 +42,12 @@ namespace WikipediaQuizGenerator.Hubs
 
         }
 
-        public async Task JoinLobby(string username, string userCountry)
+        /// <summary>
+        /// Registers a player in the lobby.
+        /// </summary>
+        /// <param name="username"></param>
+        /// <returns></returns>
+        public async Task JoinLobby(string username)
         {
             PlayerDataServices? playerDataServices = serviceProvider.GetService<PlayerDataServices>();
 
@@ -48,7 +58,6 @@ namespace WikipediaQuizGenerator.Hubs
 
                     //we add the player to our three libraries, and set their initial score to zero
                     playerDataServices.Players.Add(username);
-                    playerDataServices.PlayerCountries.Add(username, userCountry);
                     playerDataServices.PlayerScores.Add(username, 0);
 
                     await Clients.Caller.SendAsync("LobbyJoined", username);
@@ -148,7 +157,9 @@ namespace WikipediaQuizGenerator.Hubs
                 //send true, and an updated score if the answer was correct. Otherwise send false and the current score
                 if (playerDataServices.currentQuestionAnswer.Equals(answer))
                 {
-                    playerDataServices.PlayerScores[username]++;
+                    playerDataServices.playerAnswerOrder.Add(username);
+                    playerDataServices.PlayerScores[username] += calculateScore((playerDataServices.playerAnswerOrder.IndexOf(username) + 1));
+
                     await Clients.Caller.SendAsync("RecieveClientScore", true, playerDataServices.PlayerScores[username]);
                 }
                 else 
@@ -180,6 +191,25 @@ namespace WikipediaQuizGenerator.Hubs
 
         }
 
+        /// <summary>
+        /// Calculates the score gain of a player given the order in which they answered a question. This order is only counted among players that answered correctly.
+        /// The system for scoring is as follows:
+        /// 
+        /// The first player to answer correctly recieves 100 points, the next 90, the next 80 and so on. Any scores less than 50 will just be capped at 50 instead so answer number
+        /// 6 and on will all recieve the same number of points regardless of what order they answered.
+        /// </summary>
+        /// <param name="answerOrder"></param>
+        /// <returns></returns>
+        private int calculateScore(int answerOrder) 
+        {
+            int score = 100;
+
+            score -= 10 * (answerOrder - 1);
+
+            if (score > 50)
+                return score;
+            return 50;
+        }
 
 
 
