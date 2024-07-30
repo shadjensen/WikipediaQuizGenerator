@@ -26,7 +26,6 @@
     if (currentScreen.Equals("hostScreen"))
     {
         <div class="screen host-screen">
-            <!-- https://media.istockphoto.com/id/1165287336/vector/world-map-dot-illustration-on-blue-background.jpg?s=612x612&w=0&k=20&c=x7Erj7DgRzsvKlSRwZgueDPRNJshUf3wTvOSwifxfMY= -->
             <img src=@qrCodePath alt="QR Code Join Link"/>
             <div class="player-list-display">
 
@@ -52,47 +51,56 @@
     else if (currentScreen.Equals("optionsScreen"))
     {
         <div class="screen options-screen">
-            <p>Lobby Name: </p>
-            <div>
-                <input type="text" @bind=httpAddress />
-                <button @onclick="GenerateNewQRCode">Generate QR Code</button>
-            </div>
+            <div class="options"> 
+                <div class="options-column" id="'left-options'">
 
-            <div>
-                <p>Wikipedia Articles</p>
-                <input type="text" tabindex="wikipediaUrlLinks">
+                    <p>QR Code Link</p>
+                    <div>
+                        <input type="text" @bind=httpAddress />
+                        <button @onclick="GenerateNewQRCode">Generate QR Code</button>
+                    </div>
 
-            </div>
+                    <div id="wikipedia-article-entry">
+                        <p>Wikipedia Articles</p>
+                        <textarea id="wikipedia-text-entry" type="text" tabindex="wikipediaUrlLinks"> </textarea>
 
-            <div>
-                <p>End On Score: </p>
-                <input type="checkbox" @bind="endOnScore" />
-            </div>
-            @if (endOnScore)
-            {
-                <div>
-                    <p>Score To Win:</p>
-                    <input type="number" @bind="scoreToWin" />
+                    </div>
+
                 </div>
-            }
-            else
-            {
-                <div>
-                    <p>Number of Questions:</p>
-                    <input type="number" @bind="totalQuestions" />
+
+                <div class="options-column" id="right-options">
+
+                    <div>
+                        <p>End On Score: </p>
+                        <input type="checkbox" @bind="endOnScore" />
+                    </div>
+                    @if (endOnScore)
+                    {
+                        <div>
+                            <p>Score To Win:</p>
+                            <input type="number" @bind="scoreToWin" />
+                        </div>
+                    }
+                    else
+                    {
+                        <div>
+                            <p>Number of Questions:</p>
+                            <input type="number" @bind="totalQuestions" />
+                        </div>
+                    }
+                    <div>
+                        <p>Questions Per Page:</p>
+                        <input type="number" @bind="questionsPerPage" />
+                    </div>
+
+                    <div>
+                        <p>Auto Proceed After All Players Answer</p>
+                        <input type="number" @bind="autoCountdownTime" />
+                    </div>
+
                 </div>
-            }
-            <div>
-                <p>Questions Per Page:</p>
-                <input type="number" @bind="questionsPerPage" />
-            </div>
 
-            <div>
-                <p>Auto Proceed After All Players Answer</p>
-                <input type="number" @bind="autoCountdownTime" />
             </div>
-
-            
 
             <button @onclick="ShowLobby">Return to Lobby</button>
         </div>

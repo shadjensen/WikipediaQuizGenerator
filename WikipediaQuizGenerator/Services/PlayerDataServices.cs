@@ -139,26 +139,6 @@ namespace WikipediaQuizGenerator.Services
                     }
 
 
-                    /**
-
-                    //string option = wikiPage.allKeywords[random.Next(wikiPage.allKeywords.Count)];
-                    int chosenSentenceIndex = 0;
-                    while ((chosenSentenceIndex == 0) || (chosenSentenceIndex < -1) || (chosenSentenceIndex > wikiPage.sentencePairs.Count))
-                        chosenSentenceIndex = pageIndex + random.Next(12) - 6;
-
-                    Tuple<string, List<string>> chosenSentence = wikiPage.sentencePairs[chosenSentenceIndex];
-
-                    string option = chosenSentence.Item2[random.Next(chosenSentence.Item2.Count)];
-
-
-                    //ensures there are no duplicates within the options array
-                    if (!options.Contains(option) && !option.Equals(answer) || chosenSentence.Item1.Contains(option)) 
-                    {
-                        options[i] = option;
-                        foundWord = true;
-                    }
-
-                    **/
                 }
             }
             //fill the last slot with the correct answer

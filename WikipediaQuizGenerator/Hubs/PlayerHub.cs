@@ -10,6 +10,11 @@ namespace WikipediaQuizGenerator.Hubs
     {
         private readonly IServiceProvider serviceProvider;
         private ISingleClientProxy host;
+
+        /// <summary>
+        /// constructs a PlayerHub. Requires an IServiceProvider to function
+        /// </summary>
+        /// <param name="_serviceProvider"></param>
         public PlayerHub(IServiceProvider _serviceProvider)
         {
             serviceProvider = _serviceProvider;
@@ -27,6 +32,11 @@ namespace WikipediaQuizGenerator.Hubs
                 playerDataServices.ServerHost = Clients.Caller;
         }
 
+        /// <summary>
+        /// NOT IMPLEMENTED
+        /// </summary>
+        /// <param name="exception"></param>
+        /// <returns></returns>
         public override async Task OnDisconnectedAsync(Exception exception) 
         {
             var userId = Context.UserIdentifier;
@@ -72,6 +82,10 @@ namespace WikipediaQuizGenerator.Hubs
                 await Clients.Caller.SendAsync("LobbyJoined", "Could not resolve playerDataServices");
         }
 
+        /// <summary>
+        /// Sends the Wikipedia page title to the saved host player
+        /// </summary>
+        /// <returns></returns>
         public async Task SendPageTitle() 
         {
             PlayerDataServices? playerDataServices = serviceProvider.GetService<PlayerDataServices>();
@@ -84,6 +98,14 @@ namespace WikipediaQuizGenerator.Hubs
         
         }
 
+        /// <summary>
+        /// Given a page title, requests a question from that wikipedia page. A question consists of one string containing a sentence with a word or phrase
+        /// replaced with "_____", and 8 strings representing potential answers which could correctly replace the "_____" to complete the sentence. A question also
+        /// consists of one string representing the correct phrase which is passed to both the client and the host, and a sentence index number which indicates where in the 
+        /// wikipedia page this sentence is taken from. This number is later used so the host can display the context (preceeding and proceeding sentences) to the question.
+        /// </summary>
+        /// <param name="pageTitle">The title of the wikipedia page from which the question is taken</param>
+        /// <returns></returns>
         public async Task SendQuestion(string pageTitle)
         {
             PlayerDataServices? playerDataServices = serviceProvider.GetService<PlayerDataServices>();
@@ -98,6 +120,15 @@ namespace WikipediaQuizGenerator.Hubs
 
         }
 
+        /// <summary>
+        /// Given a wikipedia page and an integer representing a desired sentence's index within that page, sends to the host the sentence before and after
+        /// the desired sentence in the wikipedia page. If the desired sentence is the first or last sentence in the page, only one sentence will be sent.
+        /// 
+        /// If the sentenceIndex does not exist, an error will be thrown.
+        /// </summary>
+        /// <param name="pageTitle">The title of the Wikipedia page being queried</param>
+        /// <param name="sentenceIndex">The int index of a sentence within the wikipedia page.</param>
+        /// <returns></returns>
         public async Task SendQuestionContext(string pageTitle, int sentenceIndex) 
         {
             PlayerDataServices? playerDataServices = serviceProvider.GetService<PlayerDataServices>();
@@ -120,6 +151,11 @@ namespace WikipediaQuizGenerator.Hubs
             }
         }
 
+        /// <summary>
+        /// Sends the scores of every player to every player. This is sente as a list of Key Value pairs in which the key
+        /// is the player's name and the value is their score.
+        /// </summary>
+        /// <returns></returns>
         public async Task SendScores() 
         {
             PlayerDataServices? playerDataServices = serviceProvider.GetService<PlayerDataServices>();
@@ -135,6 +171,13 @@ namespace WikipediaQuizGenerator.Hubs
 
         }
 
+
+        ///SHOULD BE REMOVED AS THE ACTUAL CODE IS THE SAME AS SENDSCORES(). WILL REQUIRE MINOR REFACTORING
+        /// <summary>
+        /// Sends the scores of every player to every player. This is sente as a list of Key Value pairs in which the key
+        /// is the player's name and the value is their score.
+        /// </summary>
+        /// <returns></returns>
         public async Task SendFinalScores() 
         {
             PlayerDataServices? playerDataServices = serviceProvider.GetService<PlayerDataServices>();
@@ -149,6 +192,12 @@ namespace WikipediaQuizGenerator.Hubs
 
         }
 
+        /// <summary>
+        /// Called after a player submits an answer, the server checks if that answer is correct and updates scores accordingly as well as 
+        /// communicates whether or not it was correct to each player. This call is not used by the host.
+        /// </summary>
+        /// <param name="username">The name of the player</param>
+        /// <param name="answer">the player's selected answer</param>
         public async void SendAnswer(string username, string answer) 
         {
             PlayerDataServices? playerDataServices = serviceProvider.GetService<PlayerDataServices>();
@@ -174,6 +223,11 @@ namespace WikipediaQuizGenerator.Hubs
 
         }
 
+        /// <summary>
+        /// given a url, generates a QR code. This QR code is saved in the Client's wwwroot/images folder as qrcode.png. This code calls GenerateQRCode 
+        /// from a QRCodeService object, meaning if an error occurs it is either with retrieving the QRCodeService or the call within that object.
+        /// </summary>
+        /// <param name="httpAddress"></param>
         public async void GenerateQRCode(string httpAddress) 
         {
             QRCodeService? qrcodeservice = serviceProvider.GetService<QRCodeService>();

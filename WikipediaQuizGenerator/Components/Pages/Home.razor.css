@@ -1,4 +1,5 @@
 ﻿body {
+    align-content:center;
 }
 
 h3 {
@@ -23,6 +24,7 @@ h3 {
     flex-direction: column;
     justify-content: center;
     align-items:center;
+    height:100vh;
     z-index:1;
 }
 

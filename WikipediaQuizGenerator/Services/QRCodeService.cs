@@ -16,7 +16,13 @@ namespace WikipediaQuizGenerator.Services
         {
             _env = env;
         }
-
+        /// <summary>
+        /// Generates a QR Code given a url address. This qr image is generated as a png and saved to the client's wwwroot/images folder
+        /// as qrcode.png. Each time this method is called, the image is overwritten and replaced. This method currently is only functional on
+        /// windows computers as it uses a bitmap data type that is incompatible with other OS.
+        /// </summary>
+        /// <param name="url">string represting a website, usually beginning with http:// or https:// </param>
+        /// <returns>string representation of the qrcode's save directory</returns>
         public string GenerateQrCode(string url)
         {
             {

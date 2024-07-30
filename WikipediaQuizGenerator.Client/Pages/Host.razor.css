@@ -5,6 +5,15 @@ h3 {
     color:white;
 }
 
+button {
+    color:white;
+    background-color:cornflowerblue;
+    border:none;
+    border-radius:5px;
+    font-size:18px;
+    padding: 5px 10px;
+    margin:10px;
+}
 
 
 
@@ -23,7 +32,7 @@ p b {
 
 .player-list-display {
     border: none;
-    background-color: black; /* Ensure contrast */
+    background: linear-gradient(to bottom, black, transparent); /* Ensure contrast */
     height: 40vh;
     width: 50vw;
     display: flex;
@@ -80,6 +89,37 @@ ul {
     height:90vh;
     padding:20px;
 }
+
+.start-button-container {
+    margin-top:100px;
+}
+
+.options {
+    display:flex;
+    flex-direction:row;
+}
+
+.options-column {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 10px; /* Optional: Adds space inside the columns */
+    margin: 10px; /* Optional: Adds space between the columns */
+}
+
+#left-options {
+
+}
+
+#wikipedia-text-entry {
+    height:200px;
+}
+
+#right-options {
+
+}
+
 
 .footer {
 
